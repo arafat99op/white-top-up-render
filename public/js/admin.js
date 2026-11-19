@@ -1,4 +1,6 @@
-/* White Top Up — admin panel logic. */
+/* White Top Up — admin panel logic.
+   Login: username + strong password (scrypt-hashed server-side), with a
+   one-time recovery code, 5-attempt lockout, and password change. */
 (function () {
   'use strict';
 
@@ -7,13 +9,25 @@
   var TOKEN_KEY = 'wtu_admin_token';
 
   var token = localStorage.getItem(TOKEN_KEY) || null;
-  var pinIsSetup = false;
   var ordersCache = [];
   var statusFilter = '';
+  var lockTimer = null;
   var CATEGORY_LABELS = {
     diamond: 'ডায়মন্ড', deshioffer: 'দেশি অফার', membership: 'মেম্বারশিপ',
     weeklylite: 'Weekly Lite', levelup: 'Level Up Pass', likes: 'Likes',
     likeoffer: 'Like Offer', mysterybox: 'Mystery Box',
+  };
+  var ERR_BN = {
+    invalid_username: 'Username ৪–২০ অক্ষর — শুধু a–z, 0–9, _ আর -',
+    password_too_short: 'Password কমপক্ষে ৮ অক্ষরের হতে হবে',
+    password_too_long: 'Password অনেক বড় হয়ে গেছে',
+    password_weak: 'Password এ অক্ষর (A–Z) + সংখ্যা (0–9) দুটোই থাকতে হবে',
+    wrong_credentials: 'Username বা Password ভুল',
+    wrong_recovery_code: 'Recovery code ভুল',
+    wrong_password: 'বর্তমান Password ভুল',
+    already_set_up: 'অ্যাকাউন্ট আগেই বানানো হয়েছে — লগইন করো',
+    not_set_up: 'অ্যাকাউন্ট এখনো বানানো হয়নি',
+    too_many_attempts: 'অনেকবার ভুল হয়েছে — একটু পর চেষ্টা করো',
   };
 
   function toast(msg) {
@@ -41,104 +55,236 @@
     });
   }
 
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function hideError(el) { el.classList.remove('show'); }
+
+  /* ---- auth screens ---- */
+  var AUTH_SCREENS = ['login', 'setup', 'recovery', 'forgot'];
+  function showScreen(name) {
+    AUTH_SCREENS.forEach(function (n) {
+      $('#auth' + n.charAt(0).toUpperCase() + n.slice(1)).style.display = n === name ? '' : 'none';
+    });
+    $('#authWrap').style.display = '';
+    $('#adminApp').style.display = 'none';
+  }
+
   function showApp() {
-    $('#pinWrap').style.display = 'none';
+    $('#authWrap').style.display = 'none';
     $('#adminApp').style.display = '';
     loadDashboard();
   }
 
-  function showPin(isSetup) {
-    pinIsSetup = isSetup;
-    $('#pinWrap').style.display = '';
-    $('#adminApp').style.display = 'none';
-    $('#pinSub').textContent = isSetup
-      ? 'প্রথমবার — একটা PIN সেট করো (৪–১২ সংখ্যা)'
-      : 'PIN দিয়ে লগইন করো';
-    $('#pinConfirmField').style.display = isSetup ? '' : 'none';
-    $('#pinBtn').textContent = isSetup ? 'PIN সেট করো' : 'লগইন';
-    $('#pinInput').value = '';
-    $('#pinConfirm').value = '';
+  function clearLockout() {
+    if (lockTimer) { clearInterval(lockTimer); lockTimer = null; }
+    $('#lockNote').style.display = 'none';
+    $('#loginBtn').disabled = false;
   }
 
-  function pinError(msg) {
-    var el = $('#pinError');
-    el.textContent = msg;
-    el.classList.add('show');
+  function showLockout(lockedUntil) {
+    var btn = $('#loginBtn');
+    btn.disabled = true;
+    function tick() {
+      var left = Math.max(0, lockedUntil - Date.now());
+      if (left <= 0) { clearLockout(); return; }
+      var mins = Math.floor(left / 60000);
+      var secs = Math.floor((left % 60000) / 1000);
+      $('#lockNote').textContent = '🔒 অ্যাকাউন্ট লক হয়ে গেছে — ' +
+        (mins > 0 ? mins + ' মিনিট ' : '') + secs + ' সেকেন্ড পর আবার চেষ্টা করো';
+      $('#lockNote').style.display = '';
+    }
+    tick();
+    if (lockTimer) clearInterval(lockTimer);
+    lockTimer = setInterval(tick, 1000);
   }
+
+  /* ---- password rules (mirror the server) ---- */
+  function usernameError(u) {
+    if (!/^[A-Za-z0-9_-]{4,20}$/.test(u)) return ERR_BN.invalid_username;
+    return '';
+  }
+  function passwordError(pw) {
+    if (!pw || pw.length < 8) return ERR_BN.password_too_short;
+    if (pw.length > 128) return ERR_BN.password_too_long;
+    if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return ERR_BN.password_weak;
+    return '';
+  }
+  function passwordScore(pw) {
+    var s = 0;
+    if (pw.length >= 8) s++;
+    if (pw.length >= 12) s++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
+    if (/\d/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return s;
+  }
+  function updateStrengthMeter() {
+    var pw = $('#setupPass').value;
+    var score = passwordScore(pw);
+    var fill = $('#pwMeterFill');
+    var label = $('#pwMeterLabel');
+    fill.style.width = (score / 5 * 100) + '%';
+    if (!pw) { label.textContent = ''; fill.style.background = 'var(--red)'; }
+    else if (score <= 2) { label.textContent = 'দুর্বল'; label.style.color = '#B91C1C'; fill.style.background = '#B91C1C'; }
+    else if (score <= 3) { label.textContent = 'মাঝারি'; label.style.color = '#D97706'; fill.style.background = '#F59E0B'; }
+    else { label.textContent = 'শক্তিশালী ✓'; label.style.color = 'var(--green)'; fill.style.background = 'var(--green)'; }
+    $('#ruleLen').classList.toggle('ok', pw.length >= 8);
+    $('#ruleLetter').classList.toggle('ok', /[A-Za-z]/.test(pw));
+    $('#ruleDigit').classList.toggle('ok', /\d/.test(pw));
+    $('#ruleSymbol').classList.toggle('ok', /[^A-Za-z0-9]/.test(pw));
+  }
+  $('#setupPass').addEventListener('input', updateStrengthMeter);
+
+  /* show/hide password toggles */
+  $$('.pw-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = document.getElementById(btn.getAttribute('data-for'));
+      if (!input) return;
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈' : '👁️';
+    });
+  });
 
   /* ---- boot ---- */
-  fetch('/api/admin/pin-status')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (!d.pinSet) { showPin(true); return; }
+  api('/api/admin/auth-status')
+    .then(function (res) {
+      var d = res.data || {};
+      if (res.status !== 200 || !d.setup) { showScreen('setup'); return; }
+      if (d.locked) showLockout(d.lockedUntil);
       if (token) {
-        // Verify the stored token still works.
-        api('/api/admin/orders').then(function (res) {
-          if (res.status === 200) { ordersCache = res.data.orders || []; showApp(); }
-          else { token = null; localStorage.removeItem(TOKEN_KEY); showPin(false); }
+        api('/api/admin/orders').then(function (res2) {
+          if (res2.status === 200) { ordersCache = res2.data.orders || []; showApp(); }
+          else { token = null; localStorage.removeItem(TOKEN_KEY); showScreen('login'); }
         });
-      } else { showPin(false); }
+      } else { showScreen('login'); }
     })
-    .catch(function () { pinError('সার্ভারের সাথে যোগাযোগ হচ্ছে না'); });
+    .catch(function () {
+      showScreen('login');
+      showError($('#loginError'), 'সার্ভারের সাথে যোগাযোগ হচ্ছে না');
+    });
 
-  /* ---- PIN form ---- */
-  $('#pinForm').addEventListener('submit', function (e) {
+  /* ---- setup form ---- */
+  $('#setupForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    var pin = $('#pinInput').value.trim();
-    $('#pinError').classList.remove('show');
-    if (!/^\d{4,12}$/.test(pin)) { pinError('PIN ৪–১২ সংখ্যার হতে হবে'); return; }
-    if (pinIsSetup) {
-      if (pin !== $('#pinConfirm').value.trim()) { pinError('দুটো PIN মিলছে না'); return; }
-      api('/api/admin/setup-pin', { method: 'POST', body: JSON.stringify({ pin: pin }) })
-        .then(function (res) {
-          if (res.status === 200 && res.data.token) {
-            token = res.data.token;
-            localStorage.setItem(TOKEN_KEY, token);
-            toast('PIN সেট হয়েছে');
-            showApp();
-          } else { pinError('PIN সেট করা যায়নি — আবার চেষ্টা করো'); }
-        });
-    } else {
-      api('/api/admin/login', { method: 'POST', body: JSON.stringify({ pin: pin }) })
-        .then(function (res) {
-          if (res.status === 200 && res.data.token) {
-            token = res.data.token;
-            localStorage.setItem(TOKEN_KEY, token);
-            showApp();
-          } else if (res.status === 429) { pinError('অনেকবার ভুল হয়েছে — ৫ মিনিট পর চেষ্টা করো'); }
-          else { pinError('ভুল PIN'); }
-        });
-    }
+    var errEl = $('#setupError');
+    hideError(errEl);
+    var username = $('#setupUser').value.trim();
+    var pw = $('#setupPass').value;
+    var uErr = usernameError(username);
+    if (uErr) { showError(errEl, uErr); return; }
+    var pErr = passwordError(pw);
+    if (pErr) { showError(errEl, pErr); return; }
+    if (pw !== $('#setupConfirm').value) { showError(errEl, 'দুটো Password মিলছে না'); return; }
+    $('#setupBtn').disabled = true;
+    api('/api/admin/setup', { method: 'POST', body: JSON.stringify({ username: username, password: pw }) })
+      .then(function (res) {
+        $('#setupBtn').disabled = false;
+        if (res.status === 200 && res.data.token && res.data.recoveryCode) {
+          token = res.data.token;
+          localStorage.setItem(TOKEN_KEY, token);
+          $('#recoveryCodeText').textContent = res.data.recoveryCode;
+          showScreen('recovery');
+        } else if (res.status === 403) { showScreen('login'); }
+        else { showError(errEl, ERR_BN[res.data.error] || 'অ্যাকাউন্ট বানানো যায়নি — আবার চেষ্টা করো'); }
+      });
+  });
+
+  /* ---- recovery code screen ---- */
+  $('#recoveryCopyBtn').addEventListener('click', function () {
+    var code = $('#recoveryCodeText').textContent;
+    function done() { toast('Recovery code copy হয়েছে'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, done);
+    } else { done(); }
+  });
+  $('#recoveryDoneBtn').addEventListener('click', function () {
+    toast('Admin অ্যাকাউন্ট তৈরি হয়েছে');
+    showApp();
+  });
+
+  /* ---- login form ---- */
+  $('#loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var errEl = $('#loginError');
+    hideError(errEl);
+    var username = $('#loginUser').value.trim();
+    var pw = $('#loginPass').value;
+    if (!username || !pw) { showError(errEl, 'Username আর Password দুটোই দাও'); return; }
+    $('#loginBtn').disabled = true;
+    api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username: username, password: pw }) })
+      .then(function (res) {
+        if (res.status === 200 && res.data.token) {
+          token = res.data.token;
+          localStorage.setItem(TOKEN_KEY, token);
+          clearLockout();
+          showApp();
+          return;
+        }
+        $('#loginBtn').disabled = false;
+        if (res.status === 423 && res.data.lockedUntil) { showLockout(res.data.lockedUntil); }
+        else if (res.status === 403) { showScreen('setup'); }
+        else if (res.status === 401 && res.data.attemptsLeft !== undefined) {
+          showError(errEl, 'Username বা Password ভুল — আর ' + res.data.attemptsLeft + ' বার চেষ্টা করা যাবে');
+        }
+        else { showError(errEl, ERR_BN[res.data.error] || 'লগইন হয়নি — আবার চেষ্টা করো'); }
+      });
+  });
+
+  /* ---- forgot password ---- */
+  $('#forgotLink').addEventListener('click', function () {
+    hideError($('#forgotError'));
+    showScreen('forgot');
+  });
+  $('#backToLogin').addEventListener('click', function () { showScreen('login'); });
+  $('#forgotForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var errEl = $('#forgotError');
+    hideError(errEl);
+    var code = $('#forgotCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    var pw = $('#forgotPass').value;
+    if (code.length !== 16) { showError(errEl, 'Recovery code ১৬ অক্ষরের হতে হবে'); return; }
+    var pErr = passwordError(pw);
+    if (pErr) { showError(errEl, pErr); return; }
+    if (pw !== $('#forgotConfirm').value) { showError(errEl, 'দুটো Password মিলছে না'); return; }
+    $('#forgotBtn').disabled = true;
+    api('/api/admin/recover', { method: 'POST', body: JSON.stringify({ code: code, password: pw }) })
+      .then(function (res) {
+        $('#forgotBtn').disabled = false;
+        if (res.status === 200) {
+          clearLockout();
+          toast('Password বদলে গেছে — নতুন password দিয়ে লগইন করো');
+          showScreen('login');
+        } else { showError(errEl, ERR_BN[res.data.error] || 'হয়নি — আবার চেষ্টা করো'); }
+      });
   });
 
   /* ---- nav ---- */
   function switchView(view) {
-    $$('.side-link[data-view]').forEach(function (b) {
+    $$('.tab-link[data-view]').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === view);
     });
     $$('.view').forEach(function (v) { v.style.display = 'none'; });
     $('#view-' + view).style.display = '';
-    var titles = { dashboard: 'Dashboard', orders: 'Orders', packages: 'Packages', settings: 'Settings' };
-    $('#viewTitle').textContent = titles[view] || '';
-    $('.sidebar').classList.remove('open');
     if (view === 'dashboard') loadDashboard();
     if (view === 'orders') loadOrders();
     if (view === 'packages') loadPackages();
     if (view === 'settings') loadSettings();
   }
-  $$('.side-link[data-view]').forEach(function (b) {
+  $$('.tab-link[data-view]').forEach(function (b) {
     b.addEventListener('click', function () { switchView(b.getAttribute('data-view')); });
   });
   $$('[data-goto]').forEach(function (b) {
     b.addEventListener('click', function () { switchView(b.getAttribute('data-goto')); });
   });
-  $('#menuBtn').addEventListener('click', function () { $('.sidebar').classList.toggle('open'); });
 
   $('#logoutBtn').addEventListener('click', function () {
     api('/api/admin/logout', { method: 'POST' });
     token = null;
     localStorage.removeItem(TOKEN_KEY);
-    showPin(false);
+    showScreen('login');
   });
 
   /* ---- dashboard ---- */
@@ -314,6 +460,31 @@
           toast('Settings save হয়েছে');
           loadSettings();
         } else { $('#settingsMsg').textContent = 'Save হয়নি'; }
+      });
+  });
+
+  /* ---- change password ---- */
+  $('#changePwForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var errEl = $('#pwChangeError');
+    var msgEl = $('#pwChangeMsg');
+    hideError(errEl);
+    msgEl.textContent = '';
+    var current = $('#pwCurrent').value;
+    var pw = $('#pwNew').value;
+    if (!current) { showError(errEl, 'বর্তমান Password দাও'); return; }
+    var pErr = passwordError(pw);
+    if (pErr) { showError(errEl, pErr); return; }
+    if (pw !== $('#pwNewConfirm').value) { showError(errEl, 'দুটো নতুন Password মিলছে না'); return; }
+    api('/api/admin/change-password', { method: 'POST', body: JSON.stringify({ currentPassword: current, password: pw }) })
+      .then(function (res) {
+        if (res.status === 200) {
+          msgEl.textContent = '✅ Password বদলে গেছে';
+          toast('Password বদলে গেছে');
+          $('#pwCurrent').value = '';
+          $('#pwNew').value = '';
+          $('#pwNewConfirm').value = '';
+        } else { showError(errEl, ERR_BN[res.data.error] || 'হয়নি — আবার চেষ্টা করো'); }
       });
   });
 })();

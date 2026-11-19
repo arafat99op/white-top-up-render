@@ -1,42 +1,114 @@
-/* White Top Up — admin styles (dark sidebar + white content). */
-.pin-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.pin-card {
-  width: 100%; max-width: 400px; background: #fff; border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lift); padding: 32px 28px; text-align: center;
-}
-.pin-card h1 { font-family: var(--font-display); font-size: 24px; margin: 0 0 6px; }
-.pin-sub { color: var(--dim); font-size: 14.5px; margin: 0 0 20px; }
-.pin-card .field { text-align: left; margin-bottom: 14px; }
+/* White Top Up — admin styles.
+   Dark premium top bar + tab nav + white content, matching the shop:
+   dark red #9d001c accents, Rajdhani/Hind Siliguri (from style.css),
+   44pt tap targets, shop card radii + shadows. */
 
-.admin-layout { display: flex; min-height: 100vh; }
-.sidebar {
-  width: 248px; flex: none; background: #171114; color: #fff; padding: 20px 14px;
-  display: flex; flex-direction: column; gap: 20px; position: sticky; top: 0; height: 100vh;
+/* ---------- auth screens ---------- */
+.auth-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(157, 0, 28, .38), transparent 70%),
+    #171114;
 }
-.side-nav { display: flex; flex-direction: column; gap: 4px; }
-.side-link {
-  border: 0; background: none; color: rgba(255, 255, 255, .78); text-align: left;
-  padding: 11px 14px; border-radius: 12px; font-weight: 600; font-size: 15px;
-  display: flex; align-items: center; gap: 8px; min-height: 44px;
+.auth-card {
+  width: 100%; max-width: 430px; background: #fff; border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45); padding: 30px 28px 26px; text-align: center;
 }
-.side-link:hover { background: rgba(255, 255, 255, .08); color: #fff; }
-.side-link.active { background: var(--red); color: #fff; }
-.side-badge {
-  margin-left: auto; background: #fff; color: var(--red); border-radius: 999px;
+.auth-logo { height: 46px; width: auto; display: block; margin: 0 auto 10px; }
+.auth-card h1 { font-family: var(--font-display); font-size: 25px; margin: 0 0 4px; }
+.auth-card h1 span { color: var(--red); }
+.auth-sub { color: var(--dim); font-size: 14.5px; margin: 0 0 20px; }
+.auth-card .field { text-align: left; margin-bottom: 14px; }
+.link-btn {
+  border: 0; background: none; color: var(--red); font-weight: 700; font-size: 14.5px;
+  margin-top: 16px; min-height: 44px; padding: 6px 12px; cursor: pointer;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* password field with show/hide eye */
+.pw-field { position: relative; }
+.pw-field .input { padding-right: 52px; }
+.pw-toggle {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  border: 0; background: none; font-size: 19px; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+
+/* password strength meter */
+.pw-meter { height: 8px; border-radius: 999px; background: #EDE8E9; margin-top: 10px; overflow: hidden; }
+.pw-meter-fill { height: 100%; width: 0; border-radius: 999px; background: var(--red); transition: width .25s var(--spring), background .25s; }
+.pw-meter-label { font-size: 13px; font-weight: 700; margin: 6px 0 0; min-height: 18px; text-align: left; }
+.pw-rules { list-style: none; margin: 10px 0 0; padding: 0; text-align: left; }
+.pw-rules li { font-size: 13px; color: var(--dim); padding: 2px 0 2px 22px; position: relative; }
+.pw-rules li::before { content: "○"; position: absolute; left: 2px; }
+.pw-rules li.ok { color: var(--green); }
+.pw-rules li.ok::before { content: "✓"; }
+
+/* lockout notice */
+.lock-note {
+  background: #FEF3C7; color: #92400E; border-radius: 12px; padding: 11px 14px;
+  font-size: 13.5px; font-weight: 600; margin: 0 0 14px; text-align: left;
+}
+
+/* recovery code box */
+.recovery-box {
+  background: #171114; border-radius: 16px; padding: 18px 16px; margin: 4px 0 14px;
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+}
+.recovery-box code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 1px;
+}
+.warn-text {
+  background: #FEF3C7; border-radius: 12px; padding: 12px 14px;
+  color: #92400E; font-size: 13.5px; font-weight: 600; margin: 0 0 16px; text-align: left;
+}
+.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 1px; }
+
+/* ---------- admin app shell ---------- */
+.admin-layout { min-height: 100vh; }
+.admin-topbar {
+  position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; background: #171114; color: #fff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .25);
+}
+/* The v5 logo is black-on-transparent: it needs a white pill to read on the dark bar. */
+.topbar-logo-pill {
+  background: #fff; border-radius: 12px; padding: 6px 12px; flex: none;
+  display: inline-flex; align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+.topbar-logo { height: 30px; width: auto; display: block; }
+.topbar-title { display: flex; flex-direction: column; line-height: 1.15; }
+.topbar-title strong { font-family: var(--font-display); font-size: 18px; }
+.topbar-title span { font-size: 12px; color: rgba(255, 255, 255, .65); font-weight: 600; letter-spacing: .6px; }
+.admin-topbar .btn { margin-left: auto; }
+.admin-topbar .btn + .btn { margin-left: 0; }
+
+.tab-row {
+  position: sticky; top: 61px; z-index: 40; display: flex; gap: 6px;
+  padding: 10px 20px; background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+  overflow-x: auto; scrollbar-width: none;
+}
+.tab-row::-webkit-scrollbar { display: none; }
+.tab-link {
+  border: 0; background: none; color: var(--ink-2); white-space: nowrap;
+  padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px;
+  display: inline-flex; align-items: center; gap: 7px; min-height: 44px; cursor: pointer;
+}
+.tab-link:hover { background: #F3EFF0; }
+.tab-link.active { background: var(--red); color: #fff; box-shadow: 0 6px 16px rgba(157, 0, 28, .3); }
+.tab-badge {
+  background: #fff; color: var(--red); border-radius: 999px;
   font-size: 12px; font-weight: 700; padding: 2px 8px;
 }
-.side-logout { margin-top: auto; }
-.admin-main { flex: 1; min-width: 0; }
-.admin-topbar {
-  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px;
-  padding: 12px 20px; min-height: 60px;
-}
-.admin-topbar strong { font-family: var(--font-display); font-size: 19px; }
-.icon-btn {
-  display: none; border: 1px solid var(--line); background: #fff; border-radius: 10px;
-  width: 44px; height: 44px; font-size: 18px; align-items: center; justify-content: center;
-}
-.admin-content { padding: 22px; max-width: 980px; }
+.tab-link:not(.active) .tab-badge { background: var(--red); color: #fff; }
+
+.admin-content { padding: 22px 20px 40px; max-width: 1020px; margin: 0 auto; }
+
+/* ---------- shared admin pieces ---------- */
 .card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 20px; margin-bottom: 16px; }
 .card h3 { margin: 0 0 12px; font-family: var(--font-display); font-size: 18px; }
 .muted { color: var(--dim); font-size: 14px; }
@@ -46,8 +118,17 @@
 
 .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
 @media (max-width: 720px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
-.stat-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 20px; }
-.stat-num { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1.1; }
+.stat-card {
+  background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card);
+  padding: 20px; border-top: 4px solid var(--line);
+}
+.stat-card:nth-child(1) { border-top-color: #F59E0B; }
+.stat-card:nth-child(2) { border-top-color: #1D4ED8; }
+.stat-card:nth-child(3) { border-top-color: var(--green); }
+.stat-card:nth-child(4) { border-top-color: #B91C1C; }
+.stat-card:nth-child(5) { border-top-color: #6E6468; }
+.stat-card.stat-red { border-top-color: var(--red); }
+.stat-num { font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.1; }
 .stat-red .stat-num { color: var(--red); }
 .stat-label { color: var(--dim); font-size: 13.5px; font-weight: 600; margin-top: 4px; }
 
@@ -76,11 +157,13 @@
 .check-row { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; min-height: 44px; cursor: pointer; }
 .check-row input { width: 18px; height: 18px; accent-color: var(--red); }
 
-@media (max-width: 860px) {
-  .sidebar {
-    position: fixed; left: 0; top: 0; bottom: 0; z-index: 60;
-    transform: translateX(-105%); transition: transform .25s var(--spring);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .icon-btn { display: inline-flex; }
+@media (max-width: 640px) {
+  .admin-topbar { padding: 10px 12px; gap: 8px; }
+  .topbar-title { display: none; } /* logo pill already carries the brand */
+  .admin-topbar .btn { font-size: 13px; padding: 8px 12px; }
+  .tab-row { top: 57px; padding: 8px 12px; }
+  .tab-link { padding: 9px 14px; font-size: 14px; }
+  .admin-content { padding: 16px 12px 32px; }
+  .auth-card { padding: 26px 20px 22px; }
+  .recovery-box code { font-size: 16px; }
 }

@@ -18,6 +18,8 @@ const PAY_METHODS = ['bkash', 'nagad'];
 const PAY_FALLBACK = '01xxxxxxxx';
 const ORDER_STATUSES = ['pending', 'confirmed', 'delivered', 'rejected'];
 const SESSION_TTL_MS = 7 * 24 * 3600 * 1000; // 7 days
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 /* ---------------- helpers ---------------- */
@@ -41,8 +43,54 @@ function sortPackages(list) {
   return list.slice().sort((a, b) => (rank(a.category) - rank(b.category)) || (a.sort - b.sort) || (a.id - b.id));
 }
 
-function hashPin(pin, salt) {
-  return crypto.createHash('sha256').update(salt + ':' + pin).digest('hex');
+/* Passwords and recovery codes are hashed with scrypt (random per-secret
+   salt), never plain SHA-256. Hashes are compared in constant time. */
+function hashSecret(secret, salt) {
+  return crypto.scryptSync(secret, salt, 64).toString('hex');
+}
+
+function verifySecret(secret, salt, expectedHash) {
+  if (!salt || !expectedHash) return false;
+  try {
+    const actual = crypto.scryptSync(String(secret), salt, 64);
+    const expected = Buffer.from(String(expectedHash), 'hex');
+    return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+  } catch (e) {
+    return false;
+  }
+}
+
+function validUsername(u) {
+  return /^[A-Za-z0-9_-]{4,20}$/.test(u);
+}
+
+// Returns an error code string, or null when the password is acceptable.
+function passwordError(pw) {
+  if (typeof pw !== 'string' || pw.length < 8) return 'password_too_short';
+  if (pw.length > 128) return 'password_too_long';
+  if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return 'password_weak';
+  return null;
+}
+
+// Recovery code: 16 random hex chars, shown as XXXX-XXXX-XXXX-XXXX.
+function newRecoveryCode() {
+  const hex = crypto.randomBytes(8).toString('hex').toUpperCase();
+  return hex.slice(0, 4) + '-' + hex.slice(4, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16);
+}
+
+function normalizeRecoveryCode(code) {
+  return String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+// An admin record counts as "set up" only when it has a username + password
+// hash. An old PIN-only record (no username) is treated as NOT set up, and
+// a fresh setup overwrites it completely.
+function isSetup(admin) {
+  return Boolean(admin && admin.username && admin.passwordHash && admin.passwordSalt);
+}
+
+function isLocked(admin) {
+  return Boolean(admin && admin.lockedUntil && admin.lockedUntil > Date.now());
 }
 
 function newToken() {
@@ -90,6 +138,7 @@ function publicSettings(stored) {
 module.exports = function createRouter(db) {
   // Simple in-memory login throttle: max 10 failed attempts per IP per 5 min.
   // (Per function instance — good enough for a single-owner admin panel.)
+  // Also guards password recovery against guessing the recovery code.
   const loginAttempts = new Map();
   function loginBlocked(ip) {
     const rec = loginAttempts.get(ip);
@@ -204,36 +253,112 @@ module.exports = function createRouter(db) {
 
   /* ---- admin: auth ---- */
 
-  async function handlePinStatus() {
+  async function handleAuthStatus() {
     const admin = await db.getAdmin();
-    return ok({ pinSet: Boolean(admin && admin.pinHash) });
+    const setup = isSetup(admin);
+    const locked = setup && isLocked(admin);
+    return ok({
+      setup,
+      locked,
+      lockedUntil: locked ? admin.lockedUntil : null,
+    });
   }
 
-  async function handleSetupPin(body) {
+  async function handleSetup(body) {
     const admin = await db.getAdmin();
-    if (admin && admin.pinHash) return err(403, 'pin_already_set');
-    const pin = String((body || {}).pin || '');
-    if (!/^\d{4,12}$/.test(pin)) return err(400, 'invalid_pin');
-    const salt = crypto.randomBytes(16).toString('hex');
-    await db.saveAdmin({ pinHash: hashPin(pin, salt), pinSalt: salt });
+    if (isSetup(admin)) return err(403, 'already_set_up');
+    body = body || {};
+    const username = String(body.username || '').trim();
+    if (!validUsername(username)) return err(400, 'invalid_username');
+    const pwErr = passwordError(body.password);
+    if (pwErr) return err(400, pwErr);
+    const passwordSalt = crypto.randomBytes(16).toString('hex');
+    const recoveryCode = newRecoveryCode();
+    const recoverySalt = crypto.randomBytes(16).toString('hex');
+    await db.saveAdmin({
+      username,
+      passwordHash: hashSecret(body.password, passwordSalt),
+      passwordSalt,
+      recoveryHash: hashSecret(normalizeRecoveryCode(recoveryCode), recoverySalt),
+      recoverySalt,
+      failedAttempts: 0,
+      lockedUntil: 0,
+    });
     const token = newToken();
     await db.createSession(token, Date.now());
-    return ok({ ok: true, token });
+    // The recovery code is returned ONLY here — never again.
+    return ok({ ok: true, token, recoveryCode });
   }
 
   async function handleLogin(body, ip) {
-    if (loginBlocked(ip)) return err(429, 'too_many_attempts');
     const admin = await db.getAdmin();
-    if (!admin || !admin.pinHash) return err(403, 'pin_not_set');
-    const pin = String((body || {}).pin || '');
-    if (hashPin(pin, admin.pinSalt) !== admin.pinHash) {
+    if (!isSetup(admin)) return err(403, 'not_set_up');
+    if (isLocked(admin)) {
+      return err(423, 'account_locked', { lockedUntil: admin.lockedUntil });
+    }
+    if (loginBlocked(ip)) return err(429, 'too_many_attempts');
+    body = body || {};
+    const username = String(body.username || '').trim();
+    const password = body.password;
+    // Same error for a wrong username or a wrong password — never leak which.
+    if (username !== admin.username || !verifySecret(password, admin.passwordSalt, admin.passwordHash)) {
       loginFailed(ip);
-      return err(401, 'wrong_pin');
+      const failedAttempts = (admin.failedAttempts || 0) + 1;
+      const patch = { failedAttempts };
+      if (failedAttempts >= MAX_FAILED_ATTEMPTS) patch.lockedUntil = Date.now() + LOCKOUT_MS;
+      await db.saveAdmin(Object.assign({}, admin, patch));
+      if (patch.lockedUntil) return err(423, 'account_locked', { lockedUntil: patch.lockedUntil });
+      return err(401, 'wrong_credentials', { attemptsLeft: MAX_FAILED_ATTEMPTS - failedAttempts });
     }
     loginOk(ip);
+    await db.saveAdmin(Object.assign({}, admin, { failedAttempts: 0, lockedUntil: 0 }));
     const token = newToken();
     await db.createSession(token, Date.now());
     return ok({ ok: true, token });
+  }
+
+  async function handleRecover(body, ip) {
+    const admin = await db.getAdmin();
+    if (!isSetup(admin)) return err(403, 'not_set_up');
+    if (loginBlocked(ip)) return err(429, 'too_many_attempts');
+    body = body || {};
+    const code = normalizeRecoveryCode(body.code);
+    if (code.length !== 16 || !verifySecret(code, admin.recoverySalt, admin.recoveryHash)) {
+      loginFailed(ip);
+      return err(401, 'wrong_recovery_code');
+    }
+    const pwErr = passwordError(body.password);
+    if (pwErr) return err(400, pwErr);
+    const passwordSalt = crypto.randomBytes(16).toString('hex');
+    await db.saveAdmin(Object.assign({}, admin, {
+      passwordHash: hashSecret(body.password, passwordSalt),
+      passwordSalt,
+      failedAttempts: 0,
+      lockedUntil: 0,
+    }));
+    // The recovery code stays the same; all sessions are cleared so the
+    // owner must log in again with the new password.
+    if (typeof db.deleteAllSessions === 'function') {
+      await db.deleteAllSessions().catch(() => {});
+    }
+    return ok({ ok: true });
+  }
+
+  async function handleChangePassword(body) {
+    const admin = await db.getAdmin();
+    if (!isSetup(admin)) return err(403, 'not_set_up');
+    body = body || {};
+    if (!verifySecret(body.currentPassword, admin.passwordSalt, admin.passwordHash)) {
+      return err(401, 'wrong_password');
+    }
+    const pwErr = passwordError(body.password);
+    if (pwErr) return err(400, pwErr);
+    const passwordSalt = crypto.randomBytes(16).toString('hex');
+    await db.saveAdmin(Object.assign({}, admin, {
+      passwordHash: hashSecret(body.password, passwordSalt),
+      passwordSalt,
+    }));
+    return ok({ ok: true });
   }
 
   async function handleLogout(headers) {
@@ -429,9 +554,10 @@ module.exports = function createRouter(db) {
       let m = /^\/orders\/([A-Za-z0-9-]+)$/.exec(path);
       if (m && method === 'GET') return handleTrackOrder(m[1]);
 
-      if (path === '/admin/pin-status' && method === 'GET') return handlePinStatus();
-      if (path === '/admin/setup-pin' && method === 'POST') return handleSetupPin(body);
+      if (path === '/admin/auth-status' && method === 'GET') return handleAuthStatus();
+      if (path === '/admin/setup' && method === 'POST') return handleSetup(body);
       if (path === '/admin/login' && method === 'POST') return handleLogin(body, ip);
+      if (path === '/admin/recover' && method === 'POST') return handleRecover(body, ip);
 
       // Everything below needs a valid admin session.
       const authed = async () => {
@@ -442,6 +568,10 @@ module.exports = function createRouter(db) {
       if (path === '/admin/logout' && method === 'POST') {
         const denied = await authed(); if (denied) return denied;
         return handleLogout(headers);
+      }
+      if (path === '/admin/change-password' && method === 'POST') {
+        const denied = await authed(); if (denied) return denied;
+        return handleChangePassword(body);
       }
       if (path === '/admin/orders' && method === 'GET') {
         const denied = await authed(); if (denied) return denied;

@@ -6,7 +6,9 @@
      { packages: [...54 packages...],
        orders:   [...orders keyed by WTU-XXXXXX code...],
        settings: {...},
-       admin:    { pinHash, pinSalt } (nulls until the owner sets a PIN),
+       admin:    { username, passwordHash, passwordSalt, recoveryHash,
+                   recoverySalt, failedAttempts, lockedUntil }
+                 (empty until the owner completes first-time setup),
        sessions: [{ token, createdAt }] — 7-day admin sessions }
 
    State is held in memory and persisted on every mutation. Reads return
@@ -27,7 +29,7 @@ function emptyState() {
     packages: [],
     orders: [],
     settings: {},
-    admin: { pinHash: null, pinSalt: null },
+    admin: {},
     sessions: [],
   };
 }
@@ -95,12 +97,11 @@ function createFileDb() {
     },
 
     async getAdmin() {
-      const a = state.admin || {};
-      return { pinHash: a.pinHash || null, pinSalt: a.pinSalt || null };
+      return clone(state.admin) || {};
     },
 
     async saveAdmin(admin) {
-      state.admin = { pinHash: admin.pinHash || null, pinSalt: admin.pinSalt || null };
+      state.admin = clone(admin) || {};
       save();
     },
 
@@ -149,6 +150,12 @@ function createFileDb() {
       const before = state.sessions.length;
       state.sessions = state.sessions.filter((x) => x.token !== token);
       if (state.sessions.length !== before) save();
+    },
+
+    async deleteAllSessions() {
+      if (state.sessions.length === 0) return;
+      state.sessions = [];
+      save();
     },
 
     // Idempotent first-run seed: writes the full catalog + default settings
