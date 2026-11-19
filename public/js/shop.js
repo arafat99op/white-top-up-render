@@ -8,9 +8,9 @@
   var state = {
     packages: [],
     settings: null,
-    filter: 'all',
+    filter: 'diamond',
     selectedId: null,
-    method: 'bkash',
+    method: null,
   };
 
   var METHOD_LABELS = { bkash: 'bKash', nagad: 'Nagad' };
@@ -19,6 +19,21 @@
     weeklylite: 'Weekly Lite', levelup: 'Level Up Pass', likes: 'Likes',
     likeoffer: 'Like Offer', mysterybox: 'Mystery Box',
   };
+  var CATEGORY_NOTES = {
+    diamond: 'ID Code টপ আপ — শুধু UID দিলেই হবে, পাসওয়ার্ড লাগে না।',
+    deshioffer: 'দেশি অফার — প্রতি UID-তে লিমিট আছে: Monthly / Weekly সর্বোচ্চ ১ বার (৭ দিনে), Weekly Lite সর্বোচ্চ ৫ বার (২ দিনে)।',
+    membership: 'মেম্বারশিপ অ্যাক্টিভ হলে প্রতিদিন লগইন করে ডায়মন্ড ক্লেইম করতে হয়।',
+    weeklylite: 'ছোট মেম্বারশিপ — কম দামে প্রতিদিন ডায়মন্ড।',
+    levelup: 'লেভেল অনুযায়ী রিওয়ার্ড আনলক হয় — প্যাকেজ কিনলেই অ্যাক্টিভ।',
+    likes: 'লাইক সরাসরি তোমার Free Fire প্রোফাইলে যাবে।',
+    likeoffer: 'প্রতিদিন ২০০ লাইক — প্যাকেজের মেয়াদ অনুযায়ী।',
+    mysterybox: 'সারপ্রাইজ গিফট বক্স — ভেতরে কী আছে জানতে কিনে দেখো!',
+  };
+  var CATEGORY_ICONS = {
+    deshioffer: '🇧🇩', membership: '📅', weeklylite: '💠', levelup: '⭐',
+    likes: '❤️', likeoffer: '🔥', mysterybox: '🎁',
+  };
+  var COMBO_NAME = 'Weekly + Monthly Combo';
 
   /* ---- digit conversion: Bangla / Arabic-Indic -> English ---- */
   function toEnglishDigits(s) {
@@ -38,6 +53,12 @@
 
   function money(n) { return '৳' + Number(n).toLocaleString('en-US'); }
 
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   /* ---- spotlight hover ---- */
   function bindSpotlight(scope) {
     $$('.spotlight-card', scope).forEach(function (el) {
@@ -49,12 +70,28 @@
     });
   }
 
+  /* ---- marquee: fixed 5-item repeating ticker ---- */
+  function buildMarquee(notice) {
+    var items = [
+      '⚡ কনফার্ম হলেই ১–৫ মিনিটে ডেলিভারি',
+      '💳 bKash • Nagad পেমেন্ট',
+      '🔒 শুধু UID দিলেই হবে — পাসওয়ার্ড লাগে না',
+      notice,
+      '🎧 বাংলায় সাপোর্ট 9AM–12AM',
+    ];
+    var group = items.map(function (t) { return '<span>' + escapeHtml(t) + '</span>'; }).join('');
+    $('#marqueeTrack').innerHTML = group + group;
+  }
+  buildMarquee('White Top Up — Free Fire Diamond Top Up BD');
+
   /* ---- render ---- */
+  function renderCatNote() {
+    $('#catNote').textContent = CATEGORY_NOTES[state.filter] || '';
+  }
+
   function renderPackages() {
     var grid = $('#pkgGrid');
-    var list = state.packages.filter(function (p) {
-      return state.filter === 'all' || p.category === state.filter;
-    });
+    var list = state.packages.filter(function (p) { return p.category === state.filter; });
     if (!list.length) {
       grid.innerHTML = '<p style="color:var(--dim);grid-column:1/-1">এই ক্যাটাগরিতে এখন কোনো প্যাকেজ নেই।</p>';
       return;
@@ -63,21 +100,28 @@
       var badge = p.badge ? '<span class="pkg-badge">' + escapeHtml(p.badge) + '</span>' : '';
       var sel = p.id === state.selectedId ? ' selected' : '';
       var old = p.oldPrice ? '<span class="old">' + money(p.oldPrice) + '</span>' : '';
+      var note = p.note ? '<div class="pkg-note">' + escapeHtml(p.note) + '</div>' : '<div class="pkg-note"></div>';
       // Mystery Box: gift icon + the price as the big figure (no invented contents).
       if (p.category === 'mysterybox') {
-        var note = p.note ? '<div class="pkg-note">' + escapeHtml(p.note) + '</div>' : '<div class="pkg-note"></div>';
         return '<button type="button" class="pkg-card pkg-mystery spotlight-card pressable' + sel + '" data-id="' + p.id + '">' +
           badge + '<div class="pkg-gift">🎁</div>' +
           '<div class="pkg-name">' + escapeHtml(p.name) + '</div>' + note +
           '<div class="pkg-price">' + money(p.price) + old + '</div></button>';
       }
-      var dia = p.diamonds
-        ? '<div class="pkg-diamonds">' + p.diamonds.toLocaleString('en-US') + ' <span class="gem">💎</span></div>'
-        : '<div class="pkg-diamonds">' + escapeHtml(CATEGORY_LABELS[p.category] || '') + '</div>';
-      var note2 = p.note ? '<div class="pkg-note">' + escapeHtml(p.note) + '</div>' : '<div class="pkg-note"></div>';
+      // Diamond packs: big diamond number + per-diamond rate.
+      if (p.category === 'diamond' && p.diamonds) {
+        var per = (p.price / p.diamonds).toFixed(2);
+        return '<button type="button" class="pkg-card spotlight-card pressable' + sel + '" data-id="' + p.id + '">' +
+          badge + '<div class="pkg-diamonds">' + p.diamonds.toLocaleString('en-US') + ' <span class="gem">💎</span></div>' +
+          '<div class="pkg-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="pkg-per">প্রতি ডায়মন্ড ≈ ৳' + per + '</div>' +
+          '<div class="pkg-price">' + money(p.price) + old + '</div></button>';
+      }
+      // Everything else: category icon + name + its own subtitle.
+      var icon = CATEGORY_ICONS[p.category] || '💎';
       return '<button type="button" class="pkg-card spotlight-card pressable' + sel + '" data-id="' + p.id + '">' +
-        badge + dia +
-        '<div class="pkg-name">' + escapeHtml(p.name) + '</div>' + note2 +
+        badge + '<div class="pkg-icon">' + icon + '</div>' +
+        '<div class="pkg-name">' + escapeHtml(p.name) + '</div>' + note +
         '<div class="pkg-price">' + money(p.price) + old + '</div></button>';
     }).join('');
     $$('#pkgGrid .pkg-card').forEach(function (card) {
@@ -96,7 +140,7 @@
   }
 
   function receiveNumber() {
-    if (!state.settings) return '01xxxxxxxx';
+    if (!state.settings || !state.method) return '01xxxxxxxx';
     var key = 'pay' + state.method.charAt(0).toUpperCase() + state.method.slice(1);
     return state.settings[key] || '01xxxxxxxx';
   }
@@ -106,18 +150,19 @@
     var uid = $('#uidInput').value.trim();
     $('#sumUid').textContent = uid || '—';
     $('#sumPkg').textContent = pkg ? pkg.name : 'প্যাকেজ বেছে নাও';
-    $('#sumPay').textContent = METHOD_LABELS[state.method];
     $('#sumTotal').textContent = pkg ? money(pkg.price) : '৳0';
-    $('#receiveNumber').textContent = receiveNumber();
-    $('#receiveLabel').textContent = 'এই ' + METHOD_LABELS[state.method] + ' নম্বরে টাকা পাঠাও (Send Money)';
+    $('#orderBtn').textContent = pkg ? 'Order Now — ' + money(pkg.price) : 'Order Now';
+    if (state.method) {
+      $('#receiveNumber').textContent = receiveNumber();
+      $('#receiveLabel').textContent = 'এই ' + METHOD_LABELS[state.method] + ' নম্বরে' +
+        (pkg ? ' ' + money(pkg.price) : '') + ' Send Money করো';
+    }
   }
 
   function applySettings() {
     var s = state.settings;
     if (!s) return;
-    var notice = s.notice || 'White Top Up — Free Fire Diamond Top Up BD';
-    var track = $('#marqueeTrack');
-    track.innerHTML = '<span>' + escapeHtml(notice) + '</span><span>' + escapeHtml(notice) + '</span>';
+    buildMarquee(s.notice || 'White Top Up — Free Fire Diamond Top Up BD');
     if (s.deliveryNote) {
       $('#deliveryNoteHero').textContent = s.deliveryNote;
       $('#deliveryNoteSum').textContent = s.deliveryNote;
@@ -131,14 +176,8 @@
     updateSummary();
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
   /* ---- load storefront ---- */
-  fetch('/api/storefront')
+  fetch((window.API_BASE || '') + '/api/storefront')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       state.packages = data.packages || [];
@@ -160,26 +199,38 @@
   });
 
   /* ---- category filter ---- */
-  $$('#segControl .seg-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      $$('#segControl .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', 'false'); });
-      btn.setAttribute('aria-selected', 'true');
-      state.filter = btn.getAttribute('data-filter');
-      renderPackages();
+  function setFilter(cat) {
+    state.filter = cat;
+    $$('#segControl .seg-btn').forEach(function (b) {
+      b.setAttribute('aria-selected', b.getAttribute('data-filter') === cat ? 'true' : 'false');
     });
+    renderCatNote();
+    renderPackages();
+  }
+  $$('#segControl .seg-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { setFilter(btn.getAttribute('data-filter')); });
   });
 
-  /* ---- menu tiles ---- */
+  /* ---- menu tiles + footer quick links ---- */
+  function gotoCategory(cat) {
+    setFilter(cat);
+    document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
+  }
   $$('#menuTiles .tile').forEach(function (tile) {
-    tile.addEventListener('click', function () {
-      var cat = tile.getAttribute('data-category');
-      state.filter = cat;
-      $$('#segControl .seg-btn').forEach(function (b) {
-        b.setAttribute('aria-selected', b.getAttribute('data-filter') === cat ? 'true' : 'false');
-      });
-      renderPackages();
-      document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
-    });
+    tile.addEventListener('click', function () { gotoCategory(tile.getAttribute('data-category')); });
+  });
+  $$('.foot-cat').forEach(function (btn) {
+    btn.addEventListener('click', function () { gotoCategory(btn.getAttribute('data-category')); });
+  });
+
+  /* ---- combo banner: select the combo package ---- */
+  $('#comboBtn').addEventListener('click', function () {
+    var combo = state.packages.find(function (p) { return p.name === COMBO_NAME; });
+    setFilter('membership');
+    state.selectedId = combo ? combo.id : 23;
+    renderPackages();
+    updateSummary();
+    document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
   });
 
   /* ---- 3D tilt on menu tiles (mouse only; flat on touch) ---- */
@@ -199,7 +250,7 @@
     });
   }
 
-  /* ---- payment methods ---- */
+  /* ---- payment methods (none pre-selected) ---- */
   $$('#payGrid .pay-card').forEach(function (card) {
     card.addEventListener('click', function () {
       $$('#payGrid .pay-card').forEach(function (c) {
@@ -209,6 +260,8 @@
       card.classList.add('selected');
       card.setAttribute('aria-checked', 'true');
       state.method = card.getAttribute('data-method');
+      $('#payError').classList.remove('show');
+      $('#payDetails').style.display = '';
       updateSummary();
     });
   });
@@ -237,13 +290,14 @@
     var ok = true;
     if (!/^\d{5,15}$/.test(uid)) { $('#uidError').classList.add('show'); ok = false; }
     if (!pkg) { $('#pkgError').classList.add('show'); ok = false; }
+    if (!state.method) { $('#payError').classList.add('show'); ok = false; }
     if (!/^[A-Za-z0-9]{6,30}$/.test(trx)) { $('#trxError').classList.add('show'); ok = false; }
     if (!ok) return;
 
     var btn = $('#orderBtn');
     btn.disabled = true;
     btn.textContent = 'অর্ডার হচ্ছে...';
-    fetch('/api/orders', {
+    fetch((window.API_BASE || '') + '/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ packageId: pkg.id, playerUid: uid, paymentMethod: state.method, trxId: trx }),
@@ -251,13 +305,14 @@
       .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
       .then(function (res) {
         btn.disabled = false;
-        btn.textContent = 'Order Now';
+        updateSummary();
         if (res.status !== 200 || !res.data.code) {
           // Show the server's message when it has one (e.g. Deshi Offer limit).
           toast(res.data.message || 'অর্ডার হয়নি — আবার চেষ্টা করো');
           return;
         }
         $('#orderCode').textContent = res.data.code;
+        $('#summaryBox').style.display = 'none';
         $('#successBox').classList.add('show');
         $('#trxInput').value = '';
         $('#trackInput').value = res.data.code;
@@ -266,18 +321,34 @@
       })
       .catch(function () {
         btn.disabled = false;
-        btn.textContent = 'Order Now';
+        updateSummary();
         toast('নেটওয়ার্ক সমস্যা — আবার চেষ্টা করো');
       });
   });
   $('#trxInput').addEventListener('input', function () { $('#trxError').classList.remove('show'); });
 
+  /* ---- new order: restore the summary ---- */
+  $('#newOrderBtn').addEventListener('click', function () {
+    state.selectedId = null;
+    $('#successBox').classList.remove('show');
+    $('#summaryBox').style.display = '';
+    $('#trxInput').value = '';
+    renderPackages();
+    updateSummary();
+    document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
+  });
+
   /* ---- track order ---- */
   var STATUS_BN = { pending: 'Pending — যাচাই চলছে', confirmed: 'Confirmed — পেমেন্ট মিলেছে', delivered: 'Delivered ✅', rejected: 'Rejected' };
+  function formatDate(iso) {
+    try {
+      return new Date(iso).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) { return String(iso || '').slice(0, 10); }
+  }
   function trackOrder(code) {
     code = (code || $('#trackInput').value || '').trim().toUpperCase();
     if (!code) return;
-    fetch('/api/orders/' + encodeURIComponent(code))
+    fetch((window.API_BASE || '') + '/api/orders/' + encodeURIComponent(code))
       .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
       .then(function (res) {
         if (res.status !== 200 || !res.data.order) {
@@ -289,6 +360,7 @@
         var o = res.data.order;
         $('#trCode').textContent = o.code;
         $('#trPkg').textContent = o.packageName;
+        $('#trDate').textContent = o.createdAt ? formatDate(o.createdAt) : '—';
         $('#trTotal').textContent = money(o.price);
         var pill = $('#trStatus');
         pill.className = 'status-pill st-' + o.status;
@@ -314,5 +386,6 @@
   });
 
   bindSpotlight(document);
+  renderCatNote();
   updateSummary();
 })();

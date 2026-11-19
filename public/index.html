@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=3">
+<link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
 
@@ -40,19 +40,15 @@
     <a class="logo" href="/" aria-label="White Top Up — Home">
       <img class="logo-img" src="/assets/white-top-up-logo-v5.png" alt="White Top Up" width="2736" height="912">
     </a>
-    <nav class="nav" aria-label="Main">
-      <a href="#order">Top Up</a>
-      <a href="#track">Track Order</a>
-      <a href="#faq">FAQ</a>
-      <a href="#contact">Contact</a>
-      <a id="waHeaderBtn" href="#" target="_blank" rel="noopener" style="display:none">💬 WhatsApp</a>
-      <a class="btn btn-red pressable" href="#order">Top Up করো</a>
-    </nav>
+    <div class="header-right">
+      <span class="live-pill"><span class="live-dot"></span>অর্ডার চালু আছে</span>
+      <a id="waHeaderBtn" class="icon-btn wa-btn" href="https://wa.me/8801781018186" target="_blank" rel="noopener" aria-label="WhatsApp-এ মেসেজ করো"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></a>
+    </div>
   </div>
 </header>
 
 <div class="marquee" aria-label="Notice">
-  <div class="marquee-track" id="marqueeTrack"><span id="noticeText">Notice</span></div>
+  <div class="marquee-track" id="marqueeTrack"></div>
 </div>
 
 <main class="wrap">
@@ -98,55 +94,61 @@
     <p class="section-sub">Free Fire (FF) — যেটা লাগবে সেটায় ট্যাপ করো, সরাসরি অর্ডার সেকশনে নিয়ে যাবো।</p>
     <div class="tiles" id="menuTiles">
       <button class="tile spotlight-card pressable" data-category="diamond">
-        <span class="tile-art has-img"><img class="timg" src="/assets/tile-diamond.jpg" alt="Free Fire ID Code Diamond Top Up BD" loading="lazy"></span><strong>FF ID Code (BD)</strong><small>ডায়মন্ড টপ আপ — UID দিয়েই হবে</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-diamond.jpg" alt="Free Fire ID Code Diamond Top Up BD" loading="lazy"></span><span class="tile-body"><strong>FF ID Code (BD)</strong><small>ডায়মন্ড টপ আপ — UID দিয়েই হবে</small></span>
       </button>
       <button class="tile spotlight-card pressable" data-category="deshioffer">
-        <span class="tile-art">🇧🇩</span><strong>দেশি অফার</strong><small>সবচেয়ে কম দামে মেম্বারশিপ — লিমিটেড</small>
-      </button>
-      <button class="tile spotlight-card pressable" data-category="membership">
-        <span class="tile-art has-img"><img class="timg" src="/assets/tile-membership.jpg" alt="Free Fire Weekly Monthly Membership" loading="lazy"></span><strong>Weekly &amp; Monthly Offer</strong><small>মেম্বারশিপ — প্রতিদিন ডায়মন্ড</small>
-      </button>
-      <button class="tile spotlight-card pressable" data-category="weeklylite">
-        <span class="tile-art has-img"><img class="timg" src="/assets/tile-weeklylite.jpg" alt="Free Fire Weekly Lite Membership" loading="lazy"></span><strong>Weekly Lite (ID Code)</strong><small>ছোট প্যাক — কম দামে টপ আপ</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/combo-bg.jpg" alt="দেশি অফার — সবচেয়ে কম দামে মেম্বারশিপ" loading="lazy"></span><span class="tile-body"><strong>দেশি অফার</strong><small>সবচেয়ে কম দামে মেম্বারশিপ — লিমিটেড</small></span>
       </button>
       <button class="tile spotlight-card pressable" data-category="levelup">
-        <span class="tile-art has-img"><img class="timg" src="/assets/tile-levelup.jpg" alt="Free Fire Level Up Pass" loading="lazy"></span><strong>New Level Up Pass</strong><small>লেভেল অনুযায়ী রিওয়ার্ড আনলক</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-levelup.jpg" alt="Free Fire Level Up Pass" loading="lazy"></span><span class="tile-body"><strong>New Level Up Pass</strong><small>লেভেল অনুযায়ী রিওয়ার্ড আনলক</small></span>
+      </button>
+      <button class="tile spotlight-card pressable" data-category="membership">
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-membership.jpg" alt="Free Fire Weekly Monthly Membership" loading="lazy"></span><span class="tile-body"><strong>Weekly &amp; Monthly (Offer)</strong><small>মেম্বারশিপ — প্রতিদিন ডায়মন্ড</small></span>
+      </button>
+      <button class="tile spotlight-card pressable" data-category="weeklylite">
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-weeklylite.jpg" alt="Free Fire Weekly Lite Membership" loading="lazy"></span><span class="tile-body"><strong>Weekly Lite (ID Code)</strong><small>ছোট প্যাক — কম দামে টপ আপ</small></span>
       </button>
       <button class="tile spotlight-card pressable" data-category="likes">
-        <span class="tile-art">❤️</span><strong>FF Likes</strong><small>প্রোফাইলে লাইক বাড়াও</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-likes.jpg" alt="Free Fire Profile Likes" loading="lazy"></span><span class="tile-body"><strong>FF Likes</strong><small>প্রোফাইলে লাইক বাড়াও</small></span>
       </button>
       <button class="tile spotlight-card pressable" data-category="likeoffer">
-        <span class="tile-art">🔥</span><strong>Like Offer</strong><small>প্রতিদিন লাইক — 10/30/60 দিনের প্যাক</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/combo-bg.jpg" alt="Free Fire Like Offer — প্রতিদিন লাইক" loading="lazy"></span><span class="tile-body"><strong>Like Offer</strong><small>প্রতিদিন লাইক — 10/30/60 দিনের প্যাক</small></span>
       </button>
       <button class="tile spotlight-card pressable" data-category="mysterybox">
-        <span class="tile-art">🎁</span><strong>Mystery Box</strong><small>সারপ্রাইজ গিফট বক্স — ভাগ্য পরীক্ষা করো</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/combo-bg.jpg" alt="Mystery Box — সারপ্রাইজ গিফট বক্স" loading="lazy"></span><span class="tile-body"><strong>Mystery Box</strong><small>সারপ্রাইজ গিফট বক্স — ভাগ্য পরীক্ষা করো</small></span>
       </button>
-    </div>
-  </section>
-
-  <!-- COMBO BANNER -->
-  <section class="combo-banner" aria-label="Combo Offer">
-    <div class="bg"></div>
-    <div class="combo-inner">
-      <span class="combo-tag">Combo Offer</span>
-      <h3>Weekly + Monthly Combo — <span class="combo-price">৳899</span></h3>
-      <p>দুটো মেম্বারশিপ একসাথে — মোট ৩০৫০💎</p>
-      <button class="btn btn-red pressable" type="button" onclick="document.querySelector('#segControl .seg-btn[data-filter=membership]').click();document.getElementById('packages').scrollIntoView({behavior:'smooth'})">Combo নাও</button>
     </div>
   </section>
 
   <!-- ORDER -->
-  <section class="section" id="order" aria-label="Order">
-    <h2 class="section-title">অর্ডার করো</h2>
-    <p class="section-sub">৩ ধাপে শেষ — UID দাও, প্যাকেজ নাও, পেমেন্ট করো</p>
+  <section class="section" id="order" aria-label="Buy Diamond">
+    <h2 class="section-title">Buy <span style="color:var(--red)">Diamond</span></h2>
+    <p class="section-sub">প্যাকেজ বেছে নাও, UID দাও, পেমেন্ট করে TrxID জমা দাও — ব্যস! সব প্রাইস বাংলাদেশি টাকায় (BDT)।</p>
 
     <div class="order-layout">
       <div>
+        <!-- Packages FIRST -->
+        <div class="step-card" id="packages">
+          <div class="segmented" role="tablist" aria-label="Package category" id="segControl">
+            <button class="seg-btn pressable" role="tab" aria-selected="true" data-filter="diamond">ডায়মন্ড</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="deshioffer">দেশি অফার</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="membership">মেম্বারশিপ</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="weeklylite">Weekly Lite</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="levelup">Level Up Pass</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="likes">Likes</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="likeoffer">Like Offer</button>
+            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="mysterybox">Mystery Box</button>
+          </div>
+          <p class="cat-note" id="catNote"></p>
+          <div class="pkg-grid" id="pkgGrid"></div>
+          <p class="field-error" id="pkgError">একটা প্যাকেজ বেছে নাও</p>
+        </div>
+
         <!-- Step 1: UID -->
         <div class="step-card">
           <div class="step-head">
             <span class="step-num">1</span>
-            <div><h3>Player UID</h3><p>Free Fire অ্যাকাউন্টের UID টা লিখো</p></div>
+            <div><h3>তোমার Player UID</h3><p>Free Fire অ্যাকাউন্টের UID টা লিখো</p></div>
           </div>
           <div class="field">
             <label for="uidInput">Player UID</label>
@@ -157,68 +159,56 @@
           </div>
         </div>
 
-        <!-- Step 2: Package -->
-        <div class="step-card" id="packages">
-          <div class="step-head">
-            <span class="step-num">2</span>
-            <div><h3>প্যাকেজ বেছে নাও</h3><p>ডায়মন্ড, মেম্বারশিপ, লাইক, মিস্ট্রি বক্স — যা লাগবে</p></div>
-          </div>
-          <div class="segmented" role="tablist" aria-label="Package category" id="segControl">
-            <button class="seg-btn pressable" role="tab" aria-selected="true" data-filter="all">সবগুলো</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="diamond">ডায়মন্ড</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="deshioffer">দেশি অফার</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="membership">মেম্বারশিপ</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="weeklylite">Weekly Lite</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="levelup">Level Up Pass</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="likes">Likes</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="likeoffer">Like Offer</button>
-            <button class="seg-btn pressable" role="tab" aria-selected="false" data-filter="mysterybox">Mystery Box</button>
-          </div>
-          <div class="pkg-grid" id="pkgGrid"></div>
-          <p class="field-error" id="pkgError">একটা প্যাকেজ বেছে নাও</p>
-        </div>
-
-        <!-- Step 3: Payment -->
+        <!-- Step 2: Payment -->
         <div class="step-card">
           <div class="step-head">
-            <span class="step-num">3</span>
-            <div><h3>পেমেন্ট</h3><p>টাকা পাঠিয়ে TrxID টা দাও — ব্যস</p></div>
+            <span class="step-num">2</span>
+            <div><h3>পেমেন্ট করো + TrxID দাও</h3><p>মেথড বেছে নাও, টাকা পাঠিয়ে TrxID টা দাও — ব্যস</p></div>
           </div>
           <div class="pay-grid" id="payGrid" role="radiogroup" aria-label="Payment method">
-            <button class="pay-card pay-bkash pressable selected" data-method="bkash" role="radio" aria-checked="true"><img class="pay-logo" src="/assets/logo-bkash.png" alt="bKash" width="918" height="589">bKash</button>
-            <button class="pay-card pay-nagad pressable" data-method="nagad" role="radio" aria-checked="false"><img class="pay-logo" src="/assets/logo-nagad.png" alt="Nagad" width="1046" height="445">Nagad</button>
+            <button class="pay-card pay-bkash pressable" data-method="bkash" role="radio" aria-checked="false"><img class="pay-logo" src="/assets/logo-bkash.png" alt="bKash" width="918" height="589"><span class="pay-name">bKash</span><small class="pay-hint">পার্সোনাল / এজেন্ট</small></button>
+            <button class="pay-card pay-nagad pressable" data-method="nagad" role="radio" aria-checked="false"><img class="pay-logo" src="/assets/logo-nagad.png" alt="Nagad" width="1046" height="445"><span class="pay-name">Nagad</span><small class="pay-hint">পার্সোনাল / এজেন্ট</small></button>
           </div>
-          <div class="receive-box">
-            <span class="rb-label" id="receiveLabel">এই bKash নম্বরে টাকা পাঠাও (Send Money)</span>
-            <span class="rb-num" id="receiveNumber">01xxxxxxxx</span>
-            <button class="copy-btn pressable" id="copyBtn" type="button">কপি করো</button>
-          </div>
-          <div class="field" style="margin-top:16px">
-            <label for="trxInput">TrxID</label>
-            <input class="input" id="trxInput" type="text" autocomplete="off"
-              placeholder="পেমেন্টের Transaction ID" maxlength="30">
-            <p class="field-hint">শুধু TrxID দিলেই হবে — নম্বর আলাদা করে দেওয়া লাগবে না।</p>
-            <p class="field-error" id="trxError">সঠিক TrxID দাও</p>
-          </div>
-          <div class="success-box" id="successBox" role="status">
-            <h3>✅ অর্ডার জমা হয়েছে!</h3>
-            <p style="margin:0 0 6px">তোমার Order ID:</p>
-            <div class="order-code" id="orderCode"></div>
-            <p style="margin:8px 0 0">পেমেন্ট যাচাই করে কনফার্ম হলেই ডায়মন্ড পৌঁছে যাবে। নিচে Track Order দিয়ে স্ট্যাটাস দেখতে পারবে।</p>
+          <p class="field-error" id="payError">একটা পেমেন্ট মেথড বেছে নাও</p>
+          <div id="payDetails" style="display:none">
+            <div class="receive-box">
+              <span class="rb-label" id="receiveLabel">এই bKash নম্বরে টাকা পাঠাও (Send Money)</span>
+              <span class="rb-num" id="receiveNumber">01xxxxxxxx</span>
+              <button class="copy-btn pressable" id="copyBtn" type="button">কপি করো</button>
+            </div>
+            <div class="field" style="margin-top:16px">
+              <label for="trxInput">TrxID</label>
+              <input class="input" id="trxInput" type="text" autocomplete="off"
+                placeholder="পেমেন্টের Transaction ID" maxlength="30">
+              <p class="field-hint">শুধু TrxID দিলেই হবে — নম্বর আলাদা করে দেওয়া লাগবে না।</p>
+              <p class="field-error" id="trxError">সঠিক TrxID দাও</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Sticky summary -->
-      <aside class="summary glass-card" aria-label="Order summary">
-        <h3>অর্ডার সামারি</h3>
-        <div class="sum-row"><span>Player UID</span><span id="sumUid">—</span></div>
-        <div class="sum-row"><span>প্যাকেজ</span><span id="sumPkg">প্যাকেজ বেছে নাও</span></div>
-        <div class="sum-row"><span>পেমেন্ট</span><span id="sumPay">bKash</span></div>
-        <div class="sum-total"><span>মোট</span><span id="sumTotal">৳0</span></div>
-        <button class="btn btn-red pressable moving-border" id="orderBtn" type="button">Order Now</button>
-        <p class="sum-note" id="deliveryNoteSum">পেমেন্ট কনফার্ম হলে ১–৫ মিনিটে ডেলিভারি</p>
-      </aside>
+      <!-- Step 3: summary aside (replaced by the success card after ordering) -->
+      <div class="summary-col">
+        <aside class="summary glass-card" id="summaryBox" aria-label="Order summary">
+          <div class="step-head">
+            <span class="step-num">3</span>
+            <div><h3>অর্ডার কনফার্ম করো</h3><p>সব ঠিক আছে কিনা দেখে নাও</p></div>
+          </div>
+          <div class="sum-row"><span>প্যাকেজ</span><span id="sumPkg">প্যাকেজ বেছে নাও</span></div>
+          <div class="sum-row"><span>Player UID</span><span id="sumUid">—</span></div>
+          <div class="sum-row"><span>ডেলিভারি</span><span>১–৫ মিনিট</span></div>
+          <div class="sum-total"><span>মোট পেমেন্ট</span><span id="sumTotal">৳0</span></div>
+          <button class="btn btn-red pressable moving-border" id="orderBtn" type="button">Order Now</button>
+          <p class="sum-note" id="deliveryNoteSum">পেমেন্ট কনফার্ম হলে ১–৫ মিনিটে ডেলিভারি</p>
+        </aside>
+        <div class="success-box success-card" id="successBox" role="status">
+          <h3>✅ অর্ডার পেয়ে গেছি!</h3>
+          <p style="margin:0 0 6px">তোমার Order ID:</p>
+          <div class="order-code" id="orderCode"></div>
+          <p style="margin:8px 0 0">পেমেন্ট যাচাই করে কনফার্ম হলেই ডায়মন্ড পৌঁছে যাবে। নিচে Track Order দিয়ে স্ট্যাটাস দেখতে পারবে।</p>
+          <button class="btn btn-ghost pressable" id="newOrderBtn" type="button" style="margin-top:14px;width:100%">নতুন অর্ডার করো</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -229,13 +219,14 @@
     <div class="track-card">
       <div class="track-row">
         <label class="sr-only" for="trackInput" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Order ID</label>
-        <input class="input" id="trackInput" type="text" autocomplete="off" placeholder="যেমন: WTU-ABC123" maxlength="12">
-        <button class="btn btn-dark pressable" id="trackBtn" type="button">ট্র্যাক করো</button>
+        <input class="input" id="trackInput" type="text" autocomplete="off" placeholder="WTU-XXXXXX" maxlength="12">
+        <button class="btn btn-dark pressable" id="trackBtn" type="button">স্ট্যাটাস দেখো</button>
       </div>
       <p class="field-error" id="trackError">এই Order ID তে কোনো অর্ডার পাওয়া যায়নি</p>
       <div class="track-result" id="trackResult">
         <div class="sum-row"><span>Order ID</span><span id="trCode">—</span></div>
         <div class="sum-row"><span>প্যাকেজ</span><span id="trPkg">—</span></div>
+        <div class="sum-row"><span>তারিখ</span><span id="trDate">—</span></div>
         <div class="sum-row"><span>মোট</span><span id="trTotal">—</span></div>
         <div class="sum-row"><span>স্ট্যাটাস</span><span><span class="status-pill st-pending" id="trStatus">Pending</span></span></div>
         <div class="timeline" id="trTimeline">
@@ -247,14 +238,48 @@
     </div>
   </section>
 
+  <!-- COMBO BANNER -->
+  <section class="combo-banner" aria-label="Combo Offer">
+    <div class="bg"></div>
+    <div class="combo-inner">
+      <span class="combo-tag">Combo Offer</span>
+      <h3>Weekly + Monthly একসাথে — সবচেয়ে সাশ্রয়ী ডিল</h3>
+      <p>দুটো মেম্বারশিপ একসাথে — মোট ৩০৫০💎</p>
+      <div class="combo-price-row"><span class="combo-price-big">৳899</span><span class="combo-old">৳920</span><span class="combo-save">Save ৳21</span></div>
+      <button class="btn btn-red pressable moving-border" id="comboBtn" type="button">Combo টা নাও</button>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" aria-label="How it works">
+    <h2 class="section-title">মাত্র ৩ স্টেপে টপ আপ</h2>
+    <p class="section-sub">কোনো রেজিস্ট্রেশন ঝামেলা নেই, অ্যাকাউন্টের পাসওয়ার্ডও লাগে না।</p>
+    <div class="steps">
+      <div class="step-card-mini spotlight-card">
+        <span class="step-num-big">01</span>
+        <h3>UID বসাও</h3>
+        <p>Free Fire প্রোফাইল থেকে তোমার Player UID টা কপি করে অর্ডার ফর্মে বসাও। নামের নিচেই নম্বরটা থাকে।</p>
+      </div>
+      <div class="step-card-mini spotlight-card">
+        <span class="step-num-big">02</span>
+        <h3>প্যাকেজ + পেমেন্ট</h3>
+        <p>পছন্দের ডায়মন্ড প্যাকেজ সিলেক্ট করে Order করো, তারপর bKash / Nagad দিয়ে পেমেন্ট করে TrxID টা পাঠাও।</p>
+      </div>
+      <div class="step-card-mini spotlight-card">
+        <span class="step-num-big">03</span>
+        <h3>ডায়মন্ড পেয়ে যাও</h3>
+        <p>পেমেন্ট কনফার্ম হলেই ১–৫ মিনিটের মধ্যে ডায়মন্ড সরাসরি তোমার গেম অ্যাকাউন্টে পৌঁছে যাবে।</p>
+      </div>
+    </div>
+  </section>
+
   <!-- WHY / BENTO -->
   <section class="section" aria-label="Why White Top Up">
     <h2 class="section-title">কেন White Top Up?</h2>
-    <p class="section-sub">দ্রুত, সেফ আর সহজ — এটাই আমাদের কথা</p>
     <div class="bento">
       <div class="bento-cell bento-wide spotlight-card">
         <div class="bento-big">১–৫ মিনিট</div>
-        <h3>ফাস্ট ডেলিভারি</h3>
+        <h3>কনফার্ম হলেই ফাস্ট ডেলিভারি</h3>
         <p>পেমেন্ট কনফার্ম হলেই ডায়মন্ড তোমার অ্যাকাউন্টে — অপেক্ষা করতে হয় না।</p>
         <div class="chip-row">
           <span class="chip">অর্ডার জমা</span><span class="chip-arrow">→</span>
@@ -263,19 +288,21 @@
         </div>
       </div>
       <div class="bento-cell spotlight-card">
-        <h3>🔒 UID ONLY</h3>
-        <p>কোনো পাসওয়ার্ড লাগে না। শুধু UID দিলেই হবে — অ্যাকাউন্ট ১০০% সেফ।</p>
+        <h3>পাসওয়ার্ড লাগবে না</h3>
+        <p>শুধু UID দিলেই হবে — অ্যাকাউন্ট ১০০% সেফ।</p>
+        <div class="uid-pill">UID ONLY — NO LOGIN</div>
       </div>
       <div class="bento-cell spotlight-card">
-        <h3>🎧 9AM–12AM সাপোর্ট</h3>
-        <p>বাংলায় সাহায্য — WhatsApp / Telegram এ মেসেজ দিলেই উত্তর পাবে।</p>
+        <div class="bento-big">9AM–12AM</div>
+        <h3>বাংলায় সাপোর্ট</h3>
+        <p>WhatsApp-এ মেসেজ দিলেই উত্তর পাবে।</p>
       </div>
-      <div class="bento-cell spotlight-card">
-        <h3>💳 সহজ পেমেন্ট</h3>
+      <div class="bento-cell bento-wide spotlight-card">
+        <h3>সহজ পেমেন্ট</h3>
         <p>bKash আর Nagad — যেটা সুবিধা সেটা দিয়ে পেমেন্ট করো।</p>
-        <div class="brand-chips">
-          <span class="brand-chip bc-bkash">bKash</span>
-          <span class="brand-chip bc-nagad">Nagad</span>
+        <div class="pay-logos">
+          <img src="/assets/logo-bkash.png" alt="bKash" loading="lazy">
+          <img src="/assets/logo-nagad.png" alt="Nagad" loading="lazy">
         </div>
       </div>
     </div>
@@ -283,26 +310,26 @@
 
   <!-- FAQ -->
   <section class="section" id="faq" aria-label="FAQ">
-    <h2 class="section-title">সচরাচর প্রশ্ন</h2>
-    <div class="faq-item">
-      <button class="faq-q pressable" type="button">ডায়মন্ড পেতে কতক্ষণ লাগে? <span class="chev">▾</span></button>
-      <div class="faq-a">পেমেন্ট যাচাই করে কনফার্ম হলেই ১–৫ মিনিটের মধ্যে ডায়মন্ড তোমার অ্যাকাউন্টে পৌঁছে যায়।</div>
+    <h2 class="section-title">সাধারণ জিজ্ঞাসা</h2>
+    <div class="faq-item open">
+      <button class="faq-q pressable" type="button">ডায়মন্ড পেতে কতক্ষণ লাগবে? <span class="chev">▾</span></button>
+      <div class="faq-a">পেমেন্ট কনফার্ম হওয়ার পর সাধারণত ১–৫ মিনিটের মধ্যেই ডায়মন্ড তোমার অ্যাকাউন্টে পৌঁছে যায়। সার্ভার ব্যস্ত থাকলে সর্বোচ্চ ৩০ মিনিট লাগতে পারে — এর বেশি দেরি হলে সাপোর্টে Order ID টা পাঠাও।</div>
     </div>
     <div class="faq-item">
-      <button class="faq-q pressable" type="button">UID কোথায় পাবো? <span class="chev">▾</span></button>
-      <div class="faq-a">Free Fire গেমে তোমার প্রোফাইলে গেলেই UID দেখতে পাবে — নামের নিচে সংখ্যাটাই তোমার UID।</div>
+      <button class="faq-q pressable" type="button">আমার অ্যাকাউন্টের পাসওয়ার্ড কি লাগবে? <span class="chev">▾</span></button>
+      <div class="faq-a">না, একদমই না। White Top Up শুধু Player UID দিয়ে ID Code টপ আপ করে। কেউ যদি টপ আপের নামে তোমার পাসওয়ার্ড চায়, সেটা স্ক্যাম — কখনো দেবে না।</div>
     </div>
     <div class="faq-item">
-      <button class="faq-q pressable" type="button">অর্ডার করতে কী কী লাগবে? <span class="chev">▾</span></button>
-      <div class="faq-a">শুধু তোমার Player UID, একটা প্যাকেজ, আর পেমেন্টের TrxID। নম্বর আলাদা করে দেওয়া লাগে না, পাসওয়ার্ডও লাগে না।</div>
+      <button class="faq-q pressable" type="button">ভুল UID দিয়ে ফেললে কী হবে? <span class="chev">▾</span></button>
+      <div class="faq-a">ডেলিভারি হয়ে গেলে ডায়মন্ড অন্য অ্যাকাউন্টে চলে যায়, সেটা ফেরত আনা যায় না। তাই অর্ডারের আগে UID টা দুইবার মিলিয়ে নাও। ডেলিভারির আগে ভুল ধরতে পারলে সাথে সাথে সাপোর্টে জানাও।</div>
     </div>
     <div class="faq-item">
-      <button class="faq-q pressable" type="button">ভুল UID দিলে কী হবে? <span class="chev">▾</span></button>
-      <div class="faq-a">ডায়মন্ড ভুল অ্যাকাউন্টে গেলে ফেরত দেওয়া যায় না। তাই অর্ডারের আগে UID টা ভালো করে মিলিয়ে নাও।</div>
+      <button class="faq-q pressable" type="button">কোন কোন পেমেন্ট মেথড চলবে? <span class="chev">▾</span></button>
+      <div class="faq-a">bKash আর Nagad — দুটোই চলবে। অর্ডার ফর্মে দেখানো নম্বরে Send Money করে TrxID টা দিলেই হবে।</div>
     </div>
     <div class="faq-item">
-      <button class="faq-q pressable" type="button">পেমেন্ট কীভাবে করবো? <span class="chev">▾</span></button>
-      <div class="faq-a">bKash / Nagad দিয়ে দেখানো নম্বরে Send Money করো, তারপর TrxID টা অর্ডার ফর্মে দাও।</div>
+      <button class="faq-q pressable" type="button">Weekly / Monthly মেম্বারশিপ কীভাবে কাজ করে? <span class="chev">▾</span></button>
+      <div class="faq-a">মেম্বারশিপ অ্যাক্টিভ হলেই কিছু ডায়মন্ড সাথে সাথে পাবে, বাকিটা প্রতিদিন গেমে লগইন করে ক্লেইম করতে হয়। Weekly-তে মোট ৪৫০ আর Monthly-তে মোট ২,৬০০ ডায়মন্ড পর্যন্ত পাওয়া যায় — প্রতিদিন লগইন মিস করলে ওই দিনেরটা পাওয়া যায় না।</div>
     </div>
   </section>
 
@@ -312,31 +339,39 @@
   <div class="wrap">
     <div class="footer-inner">
       <div>
-        <h4>White Top Up</h4>
-        <p>Free Fire Diamond টপ আপ — দ্রুত, সেফ আর সহজ। শুধু UID দাও, ডায়মন্ড নাও।</p>
+        <div class="foot-wordmark">WHITE <b>TOP UP</b></div>
+        <p style="margin-top:12px">Free Fire Diamond টপ আপ — দ্রুত, সেফ আর সহজ। শুধু UID দাও, ডায়মন্ড নাও।</p>
       </div>
       <div>
         <h4>Quick Links</h4>
         <div class="foot-links">
-          <a class="pressable" href="#order">Top Up করো</a>
+          <button class="foot-cat pressable" type="button" data-category="diamond">FF ID Code (BD)</button>
+          <button class="foot-cat pressable" type="button" data-category="deshioffer">দেশি অফার</button>
+          <button class="foot-cat pressable" type="button" data-category="levelup">New Level Up Pass</button>
+          <button class="foot-cat pressable" type="button" data-category="membership">Weekly &amp; Monthly (Offer)</button>
+          <button class="foot-cat pressable" type="button" data-category="weeklylite">Weekly Lite (ID Code)</button>
+          <button class="foot-cat pressable" type="button" data-category="likes">FF Likes</button>
+          <button class="foot-cat pressable" type="button" data-category="likeoffer">Like Offer</button>
+          <button class="foot-cat pressable" type="button" data-category="mysterybox">Mystery Box</button>
           <a class="pressable" href="#track">অর্ডার ট্র্যাক করো</a>
-          <a class="pressable" href="#faq">FAQ</a>
         </div>
       </div>
       <div>
-        <h4>Stay Connected</h4>
+        <h4>Support Center</h4>
         <p>Helpline: 9AM–12AM</p>
-        <div class="foot-links" id="supportLinks">
-          <a class="pressable" id="waLink" href="#" target="_blank" rel="noopener">💬 WhatsApp Helpline</a>
+        <div class="foot-links" id="supportLinks" style="margin-top:10px">
+          <a class="wa-pill pressable" id="waLink" href="https://wa.me/8801781018186" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> WhatsApp Helpline</a>
           <a class="pressable" id="tgLink" href="#" target="_blank" rel="noopener">✈️ Telegram</a>
         </div>
+        <p style="margin-top:12px">অর্ডার সংক্রান্ত যেকোনো সমস্যায় Order ID টা সাথে রেখে মেসেজ দাও — সমাধান দ্রুত হবে।</p>
       </div>
     </div>
-    <div class="footer-bottom">© White Top Up — Free Fire Diamond Top Up BD. All rights reserved.</div>
+    <p class="disclaimer">White Top Up একটি স্বতন্ত্র (independent) টপ আপ শপ — Garena বা Free Fire-এর সাথে আনুষ্ঠানিকভাবে যুক্ত নয়। সব ট্রেডমার্ক সংশ্লিষ্ট মালিকদের সম্পত্তি।</p>
+    <div class="footer-bottom">© White Top Up 2026 | All Rights Reserved | Made for Bangladeshi Gamers</div>
   </div>
 </footer>
 
 <div class="toast" id="toast" role="status"></div>
-<script src="/js/shop.js?v=2"></script>
+<script src="/js/shop.js?v=3"></script>
 </body>
 </html>
