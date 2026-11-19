@@ -58,6 +58,11 @@
         <span>🎧 বাংলা সাপোর্ট 9AM–12AM</span>
       </div>
     </div>
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <img src="/assets/hero-ff.jpg" alt="Free Fire characters" width="800" height="446">
+      </div>
+    </div>
     <div class="hero-chip glass-chip">
       <small>শুরু মাত্র</small>
       <strong>25 💎 <em>৳24</em></strong>
@@ -70,19 +75,19 @@
     <p class="section-sub">যা লাগবে সেটা বেছে নাও</p>
     <div class="tiles" id="menuTiles">
       <button class="tile spotlight-card pressable" data-category="diamond">
-        <span class="tile-art">💎</span><strong>FF ID Code (BD)</strong><small>ডায়মন্ড টপ আপ — UID দিয়েই হবে</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-diamond.jpg" alt=""></span><strong>FF ID Code (BD)</strong><small>ডায়মন্ড টপ আপ — UID দিয়েই হবে</small>
       </button>
       <button class="tile spotlight-card pressable" data-category="deshioffer">
         <span class="tile-art">🇧🇩</span><strong>দেশি অফার</strong><small>সবচেয়ে কম দামে মেম্বারশিপ — লিমিটেড</small>
       </button>
       <button class="tile spotlight-card pressable" data-category="membership">
-        <span class="tile-art">📅</span><strong>Weekly &amp; Monthly Offer</strong><small>মেম্বারশিপ — প্রতিদিন ডায়মন্ড</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-membership.jpg" alt=""></span><strong>Weekly &amp; Monthly Offer</strong><small>মেম্বারশিপ — প্রতিদিন ডায়মন্ড</small>
       </button>
       <button class="tile spotlight-card pressable" data-category="weeklylite">
-        <span class="tile-art">💠</span><strong>Weekly Lite (ID Code)</strong><small>ছোট প্যাক — কম দামে টপ আপ</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-weeklylite.jpg" alt=""></span><strong>Weekly Lite (ID Code)</strong><small>ছোট প্যাক — কম দামে টপ আপ</small>
       </button>
       <button class="tile spotlight-card pressable" data-category="levelup">
-        <span class="tile-art">🆙</span><strong>New Level Up Pass</strong><small>লেভেল অনুযায়ী রিওয়ার্ড আনলক</small>
+        <span class="tile-art has-img"><img class="timg" src="/assets/tile-levelup.jpg" alt=""></span><strong>New Level Up Pass</strong><small>লেভেল অনুযায়ী রিওয়ার্ড আনলক</small>
       </button>
       <button class="tile spotlight-card pressable" data-category="likes">
         <span class="tile-art">❤️</span><strong>FF Likes</strong><small>প্রোফাইলে লাইক বাড়াও</small>
@@ -93,6 +98,17 @@
       <button class="tile spotlight-card pressable" data-category="mysterybox">
         <span class="tile-art">🎁</span><strong>Mystery Box</strong><small>সারপ্রাইজ গিফট বক্স — ভাগ্য পরীক্ষা করো</small>
       </button>
+    </div>
+  </section>
+
+  <!-- COMBO BANNER -->
+  <section class="combo-banner" aria-label="Combo Offer">
+    <div class="bg"></div>
+    <div class="combo-inner">
+      <span class="combo-tag">Combo Offer</span>
+      <h3>Weekly + Monthly Combo — <span class="combo-price">৳899</span></h3>
+      <p>দুটো মেম্বারশিপ একসাথে — মোট ৩০৫০💎</p>
+      <button class="btn btn-red pressable" type="button" onclick="document.querySelector('#segControl .seg-btn[data-filter=membership]').click();document.getElementById('packages').scrollIntoView({behavior:'smooth'})">Combo নাও</button>
     </div>
   </section>
 
