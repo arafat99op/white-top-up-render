@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — White Top Up</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+<!-- PIN gate -->
+<div class="pin-wrap" id="pinWrap">
+  <div class="pin-card">
+    <div class="logo-mark" style="margin:0 auto 14px">W</div>
+    <h1>White Top Up <span style="color:var(--red)">Admin</span></h1>
+    <p class="pin-sub" id="pinSub">PIN দিয়ে লগইন করো</p>
+    <form id="pinForm">
+      <div class="field">
+        <label for="pinInput">Admin PIN</label>
+        <input class="input" id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="৪–১২ সংখ্যার PIN" maxlength="12">
+      </div>
+      <div class="field" id="pinConfirmField" style="display:none">
+        <label for="pinConfirm">PIN আবার লিখো</label>
+        <input class="input" id="pinConfirm" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN নিশ্চিত করো" maxlength="12">
+      </div>
+      <p class="field-error" id="pinError"></p>
+      <button class="btn btn-red pressable" id="pinBtn" type="submit" style="width:100%">লগইন</button>
+    </form>
+  </div>
+</div>
+
+<!-- Admin app -->
+<div class="admin-layout" id="adminApp" style="display:none">
+  <aside class="sidebar">
+    <a class="logo" href="/admin.html">
+      <span class="logo-mark">W</span>
+      <span class="logo-text" style="color:#fff">White <span>Top Up</span></span>
+    </a>
+    <nav class="side-nav">
+      <button class="side-link pressable active" data-view="dashboard">📊 Dashboard</button>
+      <button class="side-link pressable" data-view="orders">🧾 Orders <span class="side-badge" id="pendingBadge" style="display:none">0</span></button>
+      <button class="side-link pressable" data-view="packages">💎 Packages</button>
+      <button class="side-link pressable" data-view="settings">⚙️ Settings</button>
+    </nav>
+    <button class="side-link pressable side-logout" id="logoutBtn">🚪 Logout</button>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar glass-bar">
+      <button class="icon-btn pressable" id="menuBtn" type="button" aria-label="Menu">☰</button>
+      <strong id="viewTitle">Dashboard</strong>
+      <a class="btn btn-ghost pressable" href="/" target="_blank" rel="noopener" style="margin-left:auto">Shop দেখো ↗</a>
+    </div>
+
+    <div class="admin-content">
+      <!-- DASHBOARD -->
+      <section class="view" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
+          <div class="stat-card"><div class="stat-num" id="statConfirmed">0</div><div class="stat-label">Confirmed</div></div>
+          <div class="stat-card"><div class="stat-num" id="statDelivered">0</div><div class="stat-label">Delivered</div></div>
+          <div class="stat-card"><div class="stat-num" id="statRejected">0</div><div class="stat-label">Rejected</div></div>
+          <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">মোট অর্ডার</div></div>
+          <div class="stat-card stat-red"><div class="stat-num" id="statRevenue">৳0</div><div class="stat-label">Delivered Revenue</div></div>
+        </div>
+        <div class="card">
+          <h3>সাম্প্রতিক অর্ডার</h3>
+          <div id="recentOrders"><p class="muted">কোনো অর্ডার নেই এখনো।</p></div>
+          <button class="btn btn-ghost pressable" data-goto="orders" type="button" style="margin-top:12px">সব Orders দেখো →</button>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="view" id="view-orders" style="display:none">
+        <div class="toolbar">
+          <input class="input" id="orderSearch" type="text" placeholder="Search: Order ID / UID / TrxID" style="max-width:320px">
+          <div class="segmented" id="statusFilter">
+            <button class="seg-btn pressable" data-status="" aria-selected="true">সব</button>
+            <button class="seg-btn pressable" data-status="pending" aria-selected="false">Pending</button>
+            <button class="seg-btn pressable" data-status="confirmed" aria-selected="false">Confirmed</button>
+            <button class="seg-btn pressable" data-status="delivered" aria-selected="false">Delivered</button>
+            <button class="seg-btn pressable" data-status="rejected" aria-selected="false">Rejected</button>
+          </div>
+        </div>
+        <div id="orderList"><p class="muted">লোড হচ্ছে...</p></div>
+      </section>
+
+      <!-- PACKAGES -->
+      <section class="view" id="view-packages" style="display:none">
+        <p class="muted">দাম, নাম, ব্যাজ বদলে Save চাপো। Active বন্ধ করলে প্যাকেজটা shop থেকে লুকিয়ে যাবে।</p>
+        <div id="pkgList"><p class="muted">লোড হচ্ছে...</p></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings" style="display:none">
+        <form id="settingsForm">
+          <div class="card">
+            <h3>পেমেন্ট নম্বর (টাকা আসবে যেখানে)</h3>
+            <p class="muted">খালি রাখলে shop এ 01xxxxxxxx দেখাবে।</p>
+            <div class="grid2">
+              <div class="field"><label for="setBkash">bKash নম্বর</label><input class="input" id="setBkash" type="text" maxlength="20" placeholder="01xxxxxxxxx"></div>
+              <div class="field"><label for="setNagad">Nagad নম্বর</label><input class="input" id="setNagad" type="text" maxlength="20" placeholder="01xxxxxxxxx"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>সাপোর্ট লিংক</h3>
+            <div class="grid2">
+              <div class="field"><label for="setWhatsapp">WhatsApp লিংক</label><input class="input" id="setWhatsapp" type="text" maxlength="300" placeholder="https://wa.me/8801..."></div>
+              <div class="field"><label for="setTelegram">Telegram লিংক</label><input class="input" id="setTelegram" type="text" maxlength="300" placeholder="https://t.me/..."></div>
+              <div class="field"><label for="setFacebook">Facebook লিংক</label><input class="input" id="setFacebook" type="text" maxlength="300" placeholder="https://facebook.com/..."></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Shop লেখা</h3>
+            <div class="field"><label for="setNotice">Notice (লাল strip এ দেখাবে)</label><input class="input" id="setNotice" type="text" maxlength="200"></div>
+            <div class="field"><label for="setDelivery">Delivery নোট</label><input class="input" id="setDelivery" type="text" maxlength="200"></div>
+          </div>
+          <div class="card">
+            <h3>Check UID — Leak Studio API <span class="muted" style="font-weight:400">(আপাতত বন্ধ)</span></h3>
+            <p class="muted">API key এখানে বসাও — key কখনো ব্রাউজারে ফেরত পাঠানো হয় না। Check UID এখন shop এ বন্ধ আছে; পরে চালু করা যাবে।</p>
+            <div class="field"><label for="setLeakKey">Leak Studio API Key</label><input class="input" id="setLeakKey" type="password" autocomplete="off" maxlength="200" placeholder="API key বসাও"></div>
+            <label class="check-row"><input type="checkbox" id="setClearKey"> Key মুছে ফেলো</label>
+          </div>
+          <button class="btn btn-red pressable" type="submit">Settings Save করো</button>
+          <span class="muted" id="settingsMsg" style="margin-left:10px"></span>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/js/admin.js"></script>
+</body>
+</html>

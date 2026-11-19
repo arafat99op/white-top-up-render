@@ -1,0 +1,1 @@
+{"description":"White Top Up — Free Fire top-up shop (BD), zero-dependency Node server for Render","engines":{"node":"20"},"main":"server.js","name":"white-top-up-render","private":true,"scripts":{"start":"node server.js"},"version":"1.0.0"}

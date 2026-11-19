@@ -1,0 +1,13 @@
+# Render Blueprint for White Top Up (free web service).
+# Deploy: push this folder to a Git repo, then in Render Dashboard ->
+# "New +" -> "Blueprint" -> pick the repo. Render creates the service below.
+services:
+  - type: web
+    name: white-top-up
+    env: node
+    plan: free
+    buildCommand: echo "no build step - zero dependencies"
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
