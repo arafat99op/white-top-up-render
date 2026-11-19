@@ -131,7 +131,7 @@ button { cursor: pointer; }
 
 /* Notice marquee */
 .marquee { background: var(--red); color: #fff; overflow: hidden; }
-.marquee-track { display: flex; width: max-content; animation: wtu-marquee 22s linear infinite; }
+.marquee-track { display: flex; width: max-content; animation: wtu-marquee 30s linear infinite; }
 .marquee-track span {
   padding: 9px 0; font-size: 14px; font-weight: 600; white-space: nowrap;
 }
@@ -141,40 +141,22 @@ button { cursor: pointer; }
 /* Hero */
 .hero {
   position: relative; overflow: hidden; border-radius: var(--radius-lg);
-  background: radial-gradient(120% 140% at 85% 0%, #3D0A16 0%, #171114 55%, #0E0A0C 100%);
+  background: #171114;
   color: #fff; margin-top: 20px;
   display: flex; align-items: stretch;
 }
 .hero-dots {
   position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, .14) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, .16) 1px, transparent 1px);
   background-size: 18px 18px;
 }
-.beams { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.beam {
-  position: absolute; top: -30%; height: 160%; width: 2px;
-  background: linear-gradient(to bottom, transparent, rgba(157, 0, 28, .55), rgba(255, 120, 140, .25), transparent);
-  transform: rotate(18deg); animation: beam-drift 14s linear infinite; opacity: .7;
-}
-.beam.b1 { left: 12%; animation-duration: 16s; }
-.beam.b2 { left: 38%; animation-duration: 11s; animation-delay: -4s; }
-.beam.b3 { left: 62%; animation-duration: 19s; animation-delay: -9s; }
-.beam.b4 { left: 82%; animation-duration: 13s; animation-delay: -2s; width: 1px; opacity: .45; }
-@keyframes beam-drift {
-  0% { transform: rotate(18deg) translateY(-12%); opacity: 0; }
-  15% { opacity: .7; }
-  85% { opacity: .7; }
-  100% { transform: rotate(18deg) translateY(12%); opacity: 0; }
-}
-.sparkle { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: twinkle 2.8s ease-in-out infinite; }
-.sparkle.s1 { top: 18%; left: 22%; } .sparkle.s2 { top: 62%; left: 8%; animation-delay: .7s; }
-.sparkle.s3 { top: 30%; left: 68%; animation-delay: 1.2s; } .sparkle.s4 { top: 74%; left: 46%; animation-delay: 1.8s; }
-.sparkle.s5 { top: 12%; left: 88%; animation-delay: .4s; width: 3px; height: 3px; }
-@keyframes twinkle { 0%, 100% { opacity: .15; transform: scale(.7); } 50% { opacity: .95; transform: scale(1.15); } }
-.hero-glow {
-  position: absolute; right: -120px; bottom: -160px; width: 480px; height: 480px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(157, 0, 28, .45), transparent 65%); pointer-events: none;
-}
+/* HeroBeams — exact port of the preview app: thin red comets travelling
+   along curved SVG paths (1.6px, dasharray 120 560, dashoffset 680→0). */
+.hero-beams { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-beam { stroke-dasharray: 120 560; animation-name: wtu-beam-flow; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes wtu-beam-flow { from { stroke-dashoffset: 680; } to { stroke-dashoffset: 0; } }
+.wtu-sparkle { position: absolute; border-radius: 9999px; background: #fff; box-shadow: 0 0 8px 2px rgba(255, 120, 140, .55); animation: wtu-twinkle 3.4s ease-in-out infinite; pointer-events: none; }
+@keyframes wtu-twinkle { 0%, 100% { opacity: .12; transform: scale(.65); } 50% { opacity: .95; transform: scale(1.2); } }
 .hero-inner { position: relative; padding: 48px 40px 44px; max-width: 680px; flex: 1 1 0; min-width: 0; }
 /* Hero photo: full-bleed on the right side, like the preview app */
 .hero-visual { position: relative; flex: 0 0 46%; padding: 0; }
@@ -192,11 +174,11 @@ button { cursor: pointer; }
 }
 .hero h1 .red { color: #FF4D5E; position: relative; }
 .shine {
-  background: linear-gradient(100deg, #FF4D5E 40%, #FFD9DE 50%, #FF4D5E 60%);
-  background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: shine-sweep 3.6s linear infinite;
+  background: linear-gradient(100deg, #d90429 25%, #ff8fa3 50%, #d90429 75%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: wtu-shine 4s linear infinite;
 }
-@keyframes shine-sweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes wtu-shine { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 .hero p { color: rgba(255, 255, 255, .82); font-size: 16.5px; margin: 0 0 24px; max-width: 560px; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero-trust { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 26px; color: rgba(255, 255, 255, .75); font-size: 13.5px; font-weight: 600; }
@@ -209,25 +191,29 @@ button { cursor: pointer; }
 .hero-chip strong em { font-style: normal; color: var(--red); }
 @media (max-width: 720px) {
   .hero { flex-direction: column; }
-  .hero-inner { padding: 34px 22px 30px; }
-  .hero h1 { font-size: 33px; }
-  .hero-visual { flex: none; padding: 0; height: 230px; }
-  .hero-chip { position: static; margin: 0 22px 22px; display: inline-block; }
+  .hero-inner { padding: 30px 20px 26px; }
+  .hero h1 { font-size: 31px; line-height: 1.25; }
+  .hero-visual { flex: none; padding: 0; height: 250px; }
+  .hero-chip { position: absolute; right: 14px; bottom: 14px; margin: 0; padding: 9px 14px; }
+  .hero-chip strong { font-size: 19px; }
+  .section-title { font-size: 24px; }
+  .section-sub { font-size: 14px; margin-bottom: 16px; }
+  .segmented { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%); mask-image: linear-gradient(to right, #000 88%, transparent 100%); scroll-snap-type: x proximity; }
+  .seg-btn { scroll-snap-align: start; padding: 8px 14px; font-size: 13.5px; }
 }
 
-/* Moving border (Aceternity-style) */
-@property --mb-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-.moving-border { position: relative; z-index: 0; }
+/* Moving border — exact port of the preview app: rotating conic beam. */
+.moving-border { position: relative; z-index: 0; overflow: hidden; }
 .moving-border::before {
-  content: ""; position: absolute; inset: -2px; border-radius: inherit; z-index: -1;
-  background: conic-gradient(from var(--mb-angle), transparent 0%, transparent 70%, #FF4D5E 82%, #FFD9DE 90%, #FF4D5E 96%, transparent 100%);
-  animation: mb-spin 3.2s linear infinite;
+  content: ""; position: absolute; inset: -140%; border-radius: inherit; z-index: -1;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 282deg, var(--mb-color, #9d001c) 332deg, #ffffff 352deg, transparent 360deg);
+  animation: wtu-border-spin 3.2s linear infinite;
 }
 .moving-border::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1;
+  content: ""; position: absolute; inset: 2px; border-radius: inherit; z-index: -1;
   background: inherit;
 }
-@keyframes mb-spin { to { --mb-angle: 360deg; } }
+@keyframes wtu-border-spin { to { transform: rotate(360deg); } }
 .moving-border.btn-red::after { background: var(--red); }
 
 /* Spotlight hover (Aceternity-style) */
@@ -242,9 +228,9 @@ button { cursor: pointer; }
 /* Menu tiles — 3D tilt toward the mouse (Aceternity-style 3D card).
    JS sets --rx/--ry; on touch devices tiles stay flat and tappable.
    Preview layout: 6-column desktop grid, full-bleed 4/3 photo on top. */
-.tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; perspective: 900px; }
+.tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; perspective: 1000px; }
 @media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); gap: 10px; } .tile-body { padding: 10px 11px 12px; } .tile strong { font-size: 14px; } .tile small { font-size: 11.5px; } }
 .tile {
   border: 1px solid var(--line); background: var(--card); border-radius: var(--radius);
   padding: 0; text-align: left; box-shadow: var(--shadow-card); overflow: hidden;
@@ -254,12 +240,12 @@ button { cursor: pointer; }
   transition: transform .18s var(--spring), box-shadow .18s var(--spring);
 }
 .tile:hover { box-shadow: var(--shadow-lift); }
-.tile-art { aspect-ratio: 4 / 3; overflow: hidden; background: #171114; flex: none; transform: translateZ(28px); }
+.tile-art { aspect-ratio: 4 / 3; overflow: hidden; background: #171114; flex: none; transform: translateZ(70px); }
 .tile-art .timg { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tile[data-category="levelup"] .timg { object-position: left center; }
-.tile-body { padding: 12px 13px 15px; display: flex; flex-direction: column; gap: 3px; transform: translateZ(18px); }
-.tile strong { font-family: var(--font-display); font-size: 15.5px; line-height: 1.25; }
-.tile small { color: var(--dim); font-size: 12.5px; line-height: 1.35; }
+.tile-body { padding: 12px 13px 15px; display: flex; flex-direction: column; gap: 3px; transform-style: preserve-3d; }
+.tile strong { font-family: var(--font-display); font-size: 15.5px; line-height: 1.25; transform: translateZ(50px); }
+.tile small { color: var(--dim); font-size: 12.5px; line-height: 1.35; transform: translateZ(35px); }
 
 /* Combo Offer banner (preview app's combo banner, bg image + dark overlay) */
 .combo-banner {

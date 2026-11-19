@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/style.css?v=6">
 </head>
 <body>
 
@@ -56,19 +56,37 @@
   <!-- HERO -->
   <section class="hero" aria-label="Hero">
     <div class="hero-dots"></div>
-    <div class="beams" aria-hidden="true">
-      <span class="beam b1"></span><span class="beam b2"></span>
-      <span class="beam b3"></span><span class="beam b4"></span>
-    </div>
-    <span class="sparkle s1"></span><span class="sparkle s2"></span>
-    <span class="sparkle s3"></span><span class="sparkle s4"></span><span class="sparkle s5"></span>
-    <div class="hero-glow"></div>
+    <svg class="hero-beams" viewBox="0 0 1200 420" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="wtu-beam-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#d90429" stop-opacity="0" />
+          <stop offset="50%" stop-color="#ff5c7a" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#d90429" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M -20 60 C 300 10, 700 150, 1220 50" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+      <path class="hero-beam" d="M -20 60 C 300 10, 700 150, 1220 50" fill="none" stroke="url(#wtu-beam-grad)" stroke-width="1.6" stroke-linecap="round" style="animation-duration: 7s; animation-delay: 0s" />
+      <path d="M -20 170 C 350 230, 800 80, 1220 200" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+      <path class="hero-beam" d="M -20 170 C 350 230, 800 80, 1220 200" fill="none" stroke="url(#wtu-beam-grad)" stroke-width="1.6" stroke-linecap="round" style="animation-duration: 9s; animation-delay: 1.4s" />
+      <path d="M -20 310 C 400 240, 750 370, 1220 280" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+      <path class="hero-beam" d="M -20 310 C 400 240, 750 370, 1220 280" fill="none" stroke="url(#wtu-beam-grad)" stroke-width="1.6" stroke-linecap="round" style="animation-duration: 8s; animation-delay: 2.6s" />
+      <path d="M 120 -20 C 320 150, 260 300, 430 440" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+      <path class="hero-beam" d="M 120 -20 C 320 150, 260 300, 430 440" fill="none" stroke="url(#wtu-beam-grad)" stroke-width="1.6" stroke-linecap="round" style="animation-duration: 10s; animation-delay: 0.8s" />
+      <path d="M 720 -20 C 650 160, 830 300, 760 440" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+      <path class="hero-beam" d="M 720 -20 C 650 160, 830 300, 760 440" fill="none" stroke="url(#wtu-beam-grad)" stroke-width="1.6" stroke-linecap="round" style="animation-duration: 8.5s; animation-delay: 3.4s" />
+    </svg>
+    <span class="wtu-sparkle" style="left: 6%; top: 18%; width: 4px; height: 4px; animation-delay: 0s"></span>
+    <span class="wtu-sparkle" style="left: 16%; top: 72%; width: 3px; height: 3px; animation-delay: 0.9s"></span>
+    <span class="wtu-sparkle" style="left: 30%; top: 10%; width: 3px; height: 3px; animation-delay: 1.7s"></span>
+    <span class="wtu-sparkle" style="left: 44%; top: 84%; width: 4px; height: 4px; animation-delay: 0.5s"></span>
+    <span class="wtu-sparkle" style="left: 52%; top: 26%; width: 3px; height: 3px; animation-delay: 2.3s"></span>
+    <span class="wtu-sparkle" style="left: 88%; top: 12%; width: 3px; height: 3px; animation-delay: 1.2s"></span>
     <div class="hero-inner">
       <span class="hero-badge">⚡ FREE FIRE &bull; BD SERVER &bull; ID CODE</span>
       <h1>UID দাও, <span class="red shine">ডায়মন্ড নাও</span> — এতো সহজ!</h1>
       <p>bKash/Nagad দিয়ে পেমেন্ট করো, TrxID দাও, কনফার্ম হলেই ডেলিভারি।</p>
       <div class="hero-cta">
-        <a href="#order" class="btn btn-red pressable moving-border">এখনই টপ আপ করো</a>
+        <a href="#order" class="btn btn-red pressable moving-border" style="--mb-color: #ff8098">এখনই টপ আপ করো</a>
         <a href="#track" class="btn btn-dark pressable">অর্ডার ট্র্যাক করো</a>
       </div>
       <div class="hero-trust">
@@ -372,6 +390,6 @@
 </footer>
 
 <div class="toast" id="toast" role="status"></div>
-<script src="/js/shop.js?v=3"></script>
+<script src="/js/shop.js?v=4"></script>
 </body>
 </html>

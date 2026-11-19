@@ -238,10 +238,10 @@
     $$('#menuTiles .tile').forEach(function (tile) {
       tile.addEventListener('mousemove', function (e) {
         var r = tile.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        tile.style.setProperty('--ry', (px * 10).toFixed(1) + 'deg');
-        tile.style.setProperty('--rx', (-py * 10).toFixed(1) + 'deg');
+        var px = e.clientX - (r.left + r.width / 2);
+        var py = e.clientY - (r.top + r.height / 2);
+        tile.style.setProperty('--ry', (px / 25).toFixed(1) + 'deg');
+        tile.style.setProperty('--rx', (-py / 25).toFixed(1) + 'deg');
       });
       tile.addEventListener('mouseleave', function () {
         tile.style.setProperty('--rx', '0deg');
